@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "es6",
+    "target": "es6",
+    "checkJs": false,
+    "baseUrl": "./",
+  },
+  "include": [
+    "src/**/*",
+    "babel.config.js"
+  ]
+}
