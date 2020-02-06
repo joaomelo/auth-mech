@@ -1,7 +1,8 @@
-build/
+demo/**/*
+config/
 coverage/
-env/
 src/
 node_modules/
 .*
 *.config.*
+jsconfig.json

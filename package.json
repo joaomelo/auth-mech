@@ -1,16 +1,15 @@
 {
-  "name": "lib_template",
-  "version": "2.0.1",
-  "description": "template library",
+  "name": "auth-machine",
+  "version": "1.0.0",
+  "description": "abstracts authentication state from firebase auth module making easier to develop reactive auth ui",
   "main": "lib/dist/index.js",
   "scripts": {
     "start": "webpack-dev-server --config demo/config/webpack.demo.js",
     "lint": "eslint --ext .js,.vue lib/src",
-    "test": "npm run lint && jest",
     "build": "rimraf lib/dist/* && webpack --config lib/config/webpack.lib.js",
     "commit": "git add -A && git commit",
     "push": "git push && git push --tags",
-    "pack": "npm test && npm run build && npm run commit",
+    "pack": "npm lint && npm run build && npm run commit",
     "bump:patch": "npm run pack && npm version patch && npm run push",
     "bump:minor": "npm run pack && npm version minor && npm run push",
     "bump:major": "npm run pack && npm version major && npm run push",
@@ -20,18 +19,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joaomelo/lib_template.git"
+    "url": "git+https://github.com/joaomelo/fireauth-statefull.git"
   },
   "keywords": [
-    "keyords",
-    "forlib"
+    "firebase",
+    "fireauth",
+    "ui",
+    "reactive"
   ],
   "author": "joaomelo",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/joaomelo/lib_template/issues"
+    "url": "https://github.com/joaomelo/fireauth-statefull/issues"
   },
-  "homepage": "https://github.com/joaomelo/lib_template#readme",
+  "homepage": "https://github.com/joaomelo/fireauth-statefull#readme",
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.4",
@@ -54,6 +55,7 @@
     "eslint-plugin-vue": "^6.1.2",
     "eslint-plugin-vue-libs": "^4.0.0",
     "fibers": "^4.0.2",
+    "firebase": "^7.8.0",
     "html-webpack-plugin": "^3.2.0",
     "jest": "^24.9.0",
     "rimraf": "^3.0.1",

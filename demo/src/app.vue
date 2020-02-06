@@ -1,42 +1,48 @@
 <template>
-  <div>
-    <input
-      v-model="a"
-      type="number"
-    >
-    <br><br>
-    <input
-      v-model="b"
-      type="number"
-    >
-    <br><br>
-    <button @click="add">
-      add
-    </button>
-    <br><br>
-    <input
-      v-model="total"
-      type="number"
-    >
+  <div class="container">
+    <PageHome
+      v-if="loginState === 'LOGGEDIN'"
+      :auth-machine="authMachine"
+    />
+
+    <PageLogin
+      v-if="loginState === 'LOGGEDOUT'"
+      :auth-machine="authMachine"
+    />
+
+    <p v-if="loginState === 'UNSOLVED'">
+      Solving user...
+    </p>
   </div>
 </template>
 
 <script>
-import { add } from '__lib';
+import PageHome from './page-home';
+import PageLogin from './page-login';
+
+import { authMachine } from './auth';
 
 export default {
   name: 'App',
-  data () {
-    return {
-      a: 0,
-      b: 0,
-      total: 0
-    };
+  components: {
+    PageHome,
+    PageLogin
   },
-  methods: {
-    add () {
-      this.total = add(this.a, this.b);
+  data () {
+    return { authMachine };
+  },
+  computed: {
+    loginState () {
+      return this.authMachine.authStatus;
     }
   }
 };
 </script>
+
+<style scoped>
+.container {
+  text-align: center;
+  width: 200px;
+  margin: 50px auto;
+}
+</style>
