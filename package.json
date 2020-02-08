@@ -1,6 +1,6 @@
 {
   "name": "@joaomelo/fireauth-machine",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "abstracts authentication state from firebase auth module making easier to develop reactive auth ui",
   "main": "lib/dist/index.js",
   "scripts": {
