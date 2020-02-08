@@ -1,14 +1,14 @@
-# Auth Machine
+# Fireauth Machine
 
-Abstracts authentication state from firebase auth module making easier to develop reactive auth ui
+Abstracts authentication state from firebase auth module making easier to develop reactive auth ui.
 
 ## Motivation
 
-[Firebase](https://firebase.google.com/) is awesome. It makes do easier for solo developers and small teams build software with agility. And one of it main conveniences is it's authentication module. You can read everything about it [here](https://firebase.google.com/docs/auth) and i will assume from now on that you have basic understand of it.
+[Firebase](https://firebase.google.com/) is awesome. It makes so easier for solo developers and small teams build software with agility. And one of it main conveniences is the authentication module. You can read everything about it [here](https://firebase.google.com/docs/auth) and i will assume from now on that you have basic understand of it.
 
-But after building a few login uis i found myself repeating some code to compensate to more string abstraction about the authentication state. Let's look to it in detail.
+After a few times building login uis with firebase auth i found myself repeating the same code to wrap fireauth logic with authentication state abstraction. Let me show you the issue in detail.
 
-The recommended approach to monitor react to auth changes in the app is to register a callback function (observer) in the `onAuthStateChanged` method from the auth object in the firebase project. Like this.
+The recommended approach to react to auth changes is to register a callback function (observer) in the `onAuthStateChanged` method from the auth object. Like this:
 
     import * as firebase from 'firebase/app';
     import 'firebase/auth';
@@ -17,28 +17,26 @@ The recommended approach to monitor react to auth changes in the app is to regis
       // config data
     });
 
-    fireApp.auth().onAuthStateChanged(function(user) {
+    fireApp.auth().onAuthStateChanged(user => {
       if (user) {
         // User is signed in.
-        // Now we should route to home page.
+        // Now we could route to home page.
       } else {
         // User is signed out.
-        // Let's get out to the login form.
+        // Let's go back to the login form.
       }
     });
 
-This is cool and probably everything you will ever need. So we can end this chat right now. Best of luck :).
+This is cool and probably everything you will ever need. So we can end this chat right now. Best of luck 😄.
 
-But if you are still here, the first thing that i kept dealing with is the fact the state change callback take some time to execute.
+But if you are still here... the first thing that caught my attention was the need to deal with the fact that the callback take some time to execute. Based on configuration and cached data, firebase will probably check if the user is already signed in. It will decide that first and just then, trigger the auth state change and run your registered callback.
 
-You see, based on configuration and local cached data after loaded do some logic to check if the user is already loggedin or not. After deciding that it will trigger the auth state change and run the callback.
+The consequence is that you need to do something for your user during this time of unsolved status. Maybe run a spinner or show a "solving user message". A common approach to solve this would be to use a boolean variable:
 
-So now you need to do something for your iser during this time. Maybe run a spinner or show a "solving user message". A common aprroach would be use booleand variable like this.
-
-    //firebase init code
+    // firebase init code
 
     let isUserSolved = false;
-    fireApp.auth().onAuthStateChanged(function(user) {
+    fireApp.auth().onAuthStateChanged(user => {
       isUserSolved = true;
       if (user) {
         // User is signed in.
@@ -49,23 +47,25 @@ So now you need to do something for your iser during this time. Maybe run a spin
       }
     });
 
-The variable `isUserSolved` can now be used by the ui code to the with that initial state. 
+The variable `isUserSolved` can now be used by the ui to deal with that initial state. 
 
-But a more resilient architecture should avoid this isolate booleans to represent multiple software state, as this can easily get code maintainability in trouble. This is beautifully distilled by David Khourshid in a magnificent [article](https://dev.to/davidkpiano/no-disabling-a-button-is-not-app-logic-598i) and also in a great podcast [episode](http://www.fullstackradio.com/130)
+But resilient architectures should avoid isolated booleans variables to represent software state. This can easily get code maintainability in trouble. The concept is beautifully distilled by David Khourshid in a magnificent [article](https://dev.to/davidkpiano/no-disabling-a-button-is-not-app-logic-598i) and also in a great podcast [episode](http://www.fullstackradio.com/130)
 
-To deal with that i keep repeating some sort of very simple and not that impressive (at all) state management code for auth status. To avoid bugs and keep things DRY i decided to make a package of it.
+That is how this package was born. I decided some sort of state machine was needed every time i dealt with firebase auth and wanted to avoid repeating code between apps. Even so the code is short and unimpressive, seemed good sense to avoid bugs and keep things DRY.
 
 ## Usage
 
-The library provides a way to create an `AuthMachine` which will track and expose the auth state as `'UNSOLVED'`, `'LOGGEDIN'` or `'LOGGEDOUT'`. This will luckily make reactive UIs slightly easier to build.
+The library provides a way to create an `AuthMachine` object which will track and expose the user auth state as `'UNSOLVED'`, `'SIGNIN'` or `'SIGNOUT'`. This will make reactive UIs slightly easier to build.
 
 ### Installation
 
-Install with npm with the command `npm install @joaomelo/auth-machine`.
+Install with npm.
+
+    npm install @joaomelo/fireauth-machine
 
 ### Getting Started
 
-To use it, first initialize firebase as usual than add an additional step to create the authMachine object passing the firebase Auth instance and an optionally one or more callbacks you want to call in auth state change.
+To use it, first initialize firebase as usual than add an additional step to create the `AuthMachine` object passing the firebase Auth instance. One or more callbacks can optionally be passed as the second argument if you want them called in any auth state change.
 
     import * as firebase from 'firebase/app';
     import 'firebase/auth';
@@ -74,9 +74,10 @@ To use it, first initialize firebase as usual than add an additional step to cre
     const fireApp = firebase.initializeApp({
       // config data
     });
+    const fireAuth = fireApp.auth();
 
-    const authStateChangeCallback = ({user, authStatus}) => {
-        if (authStatus === 'LOGGEDIN') {
+    const authStateChangeCallback = ({user, status}) => {
+        if (status === 'LOGGEDIN') {
           // User is signed in.
           // Now we should route to home page.
         } else {
@@ -84,34 +85,147 @@ To use it, first initialize firebase as usual than add an additional step to cre
           // Let's get out to the login form.
         }
       }
-    const authMachine = new AuthMachine(fireApp.auth(), authStateChangeCallback) 
+
+    const anotherCallback = () => console.log('auth state changed')
+
+    // you can pass multiple callbacks inside an array
+    const authMachine = new AuthMachine(fireAuth, [authStateChangeCallback, anotherCallback]) 
+
+    // pass just one callback
+    // const authMachine = new AuthMachine(fireAuth, authStateChangeCallback) 
+
+    // or none
+    // const authMachine = new AuthMachine(fireAuth) 
 
     export { authMachine }
 
 ### The Callback Can Be Old News
 
-But if you are building reactive UIs with something like Vue, Reactive, Angular or Svelte, you would probably don't need the callback any more.
+But if you are building reactive UIs with something like Vue, React, Angular or Svelte, you probably don't need the callback any more.
 
-I will use Vue because is where i am most comfortable but this can be derived even to vanilla js.
+I will use Vue to exemplify this, because is where i am most comfortable. But, this can be achieved even with vanilla js.
 
-Wh
+Let's start by creating our vue app:
 
-### Firebase Auth is Still There Don't Worry
+    // index.js
+    import Vue from 'vue';
+    import App from './app.vue';
 
-You can access using the auth property and do all the thind like register, login, logout and acess the current user.
+    const vueApp = new Vue({
+      render: h => h(App)
+    });
+
+    vueApp.$mount('#app');
+
+Then we can initialize firebase auth service and our state machine:
+
+    // auth.js
+    import * as firebase from 'firebase/app';
+    import 'firebase/auth';
+
+    import { AuthMachine } from '@joaomelo/fireauth-machine';
+
+    const fireApp = firebase.initializeApp({
+      //you firebase project config = data
+    });
+
+    const authMachine = new AuthMachine(fireApp.auth());
+    export { authMachine };
+
+Cool. Now, inside our Vue main component we can leverage the state machine to show the apropriate UI. To access the current auth state you just need to reference the `status` property of the `authMachine` you created. Like this:
+
+    <template>
+        <component
+          :is="page"
+          :auth-machine="authMachine"
+        />
+    </template>
+
+    <script>
+    import PageHome from './page-home';
+    import PageLogin from './page-login';
+    import PageLoading from './page-solving';
+
+    import { authMachine } from './auth';
+
+    export default {
+      name: 'App',
+      data () {
+        return { authMachine };
+      },
+      computed: {
+        page () {
+          const components = {
+            UNSOLVED: PageLoading,
+            SIGNIN: PageHome,
+            SIGNOUT: PageLogin
+          };
+
+          return components[this.authMachine.status];
+        }
+      }
+    };
+    </script>
+
+This way, every time the user state changes, Vue will automatically switch to the correct page.
+
+### Firebase Auth is Still There, Don't Worry!
+
+There is no ambition to create a facade over the firebase auth. If you want to use any of the service properties and methods you can reach for the auth object. You access it by the `service` property in the `authMachine` object. In a dummy home page we can do that to show the user email and call the `signOut` method in a button. Check it out:
+
+    <template>
+      <div>
+        <p>welcome {{ authMachine.service.currentUser.email }}</p>
+        <button @click.prevent="signOut">
+          sign out
+        </button>
+      </div>
+    </template>
+
+    <script>
+    export default {
+      name: 'PageHome',
+      props: {
+        authMachine: {
+          type: Object,
+          required: true
+        }
+      },
+      methods: {
+        signOut () {
+          this.authMachine.service.signOut();
+        }
+      }
+    };
+    </script>
 
 ## Wrapping up
 
-Maybe some ending message to state pitfalls or trade-offs. Totally optional.
+So to use the package you import the `AuthMachine` class and create instantiate an object passing the fireauth reference. Then, you can access the the user status by the `status` property and all fireauth functionality trough the `service` property. Simple as that.
 
 ## Using the Demo
 
-To run the demo, clone the repository, install all dev dependencies and setup firebase.
+There is a demo app you can play to explore what i said here. Start by cloning the repository.
 
-    git clone https://github.com/joaomelo/bus.git
+    git clone https://github.com/joaomelo/fireauth-machine.git
+
+Create an `demo.env` file inside the `demo/config` folder with the variables assignments bellow. Replace the values with the real ones for your firebase project.
+
+    FIREBASE_API_KEY=foobar
+    FIREBASE_AUTH_DOMAIN=foobar.firebaseapp.com
+    FIREBASE_DATABASE_URL=https://foobar.firebaseio.com
+    FIREBASE_PROJECT_ID=foobar
+    FIREBASE_STORAGE_BUCKET=foobar.appspot.com
+    FIREBASE_MSG_SENDER_ID=foobar
+    FIREBASE_APP_ID=1:foobar
+
+Then, install the dependencies and run the start script:
+
     npm install
-    npm test
+    npm start
+
+Thank you and have fun 🎉.
 
 ## License
 
-Made by [João Melo](https://www.linkedin.com/in/joaomelo81/?locale=en_US) and licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details
+Made by [João Melo](https://www.linkedin.com/in/joaomelo81/?locale=en_US) and licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details/

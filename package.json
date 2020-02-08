@@ -1,5 +1,5 @@
 {
-  "name": "auth-machine",
+  "name": "@joaomelo/fireauth-machine",
   "version": "1.0.0",
   "description": "abstracts authentication state from firebase auth module making easier to develop reactive auth ui",
   "main": "lib/dist/index.js",
@@ -9,7 +9,7 @@
     "build": "rimraf lib/dist/* && webpack --config lib/config/webpack.lib.js",
     "commit": "git add -A && git commit",
     "push": "git push && git push --tags",
-    "pack": "npm lint && npm run build && npm run commit",
+    "pack": "npm run lint && npm run build && npm run commit",
     "bump:patch": "npm run pack && npm version patch && npm run push",
     "bump:minor": "npm run pack && npm version minor && npm run push",
     "bump:major": "npm run pack && npm version major && npm run push",
@@ -19,20 +19,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joaomelo/fireauth-statefull.git"
+    "url": "git+https://github.com/joaomelo/fireauth-machine.git"
   },
   "keywords": [
     "firebase",
     "fireauth",
     "ui",
+    "state-machine",
     "reactive"
   ],
   "author": "joaomelo",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/joaomelo/fireauth-statefull/issues"
+    "url": "https://github.com/joaomelo/fireauth-machine/issues"
   },
-  "homepage": "https://github.com/joaomelo/fireauth-statefull#readme",
+  "homepage": "https://github.com/joaomelo/fireauth-machine#readme",
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.4",

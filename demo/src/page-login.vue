@@ -21,7 +21,7 @@
 
 <script>
 export default {
-  name: 'LoginForm',
+  name: 'PageLogin',
   props: {
     authMachine: {
       type: Object,
@@ -36,10 +36,10 @@ export default {
   },
   methods: {
     login () {
-      this.authMachine.authService.signInWithEmailAndPassword(this.email, this.password);
+      this.authMachine.service.signInWithEmailAndPassword(this.email, this.password);
     },
     register () {
-      this.authMachine.authService.createUserWithEmailAndPassword(this.email, this.password);
+      this.authMachine.service.createUserWithEmailAndPassword(this.email, this.password);
     }
   }
 };

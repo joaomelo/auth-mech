@@ -1,39 +1,33 @@
 <template>
   <div class="container">
-    <PageHome
-      v-if="loginState === 'LOGGEDIN'"
+    <component
+      :is="page"
       :auth-machine="authMachine"
     />
-
-    <PageLogin
-      v-if="loginState === 'LOGGEDOUT'"
-      :auth-machine="authMachine"
-    />
-
-    <p v-if="loginState === 'UNSOLVED'">
-      Solving user...
-    </p>
   </div>
 </template>
 
 <script>
 import PageHome from './page-home';
 import PageLogin from './page-login';
+import PageSolving from './page-solving';
 
 import { authMachine } from './auth';
 
 export default {
   name: 'App',
-  components: {
-    PageHome,
-    PageLogin
-  },
   data () {
     return { authMachine };
   },
   computed: {
-    loginState () {
-      return this.authMachine.authStatus;
+    page () {
+      const components = {
+        UNSOLVED: PageSolving,
+        SIGNIN: PageHome,
+        SIGNOUT: PageLogin
+      };
+
+      return components[this.authMachine.status];
     }
   }
 };

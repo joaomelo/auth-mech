@@ -1,15 +1,15 @@
 <template>
   <div>
-    <p>welcome {{ authMachine.authService.currentUser.email }}</p>
-    <button @click.prevent="logout">
-      logout
+    <p>welcome {{ authMachine.service.currentUser.email }}</p>
+    <button @click.prevent="signOut">
+      signOut
     </button>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HomePage',
+  name: 'PageHome',
   props: {
     authMachine: {
       type: Object,
@@ -17,8 +17,8 @@ export default {
     }
   },
   methods: {
-    logout () {
-      this.authMachine.authService.signOut();
+    signOut () {
+      this.authMachine.service.signOut();
     }
   }
 };
