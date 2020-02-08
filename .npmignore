@@ -1,7 +1,8 @@
 demo/**/*
 config/
 coverage/
-src/
+lib/src/
+lib/config/
 node_modules/
 .*
 *.config.*
