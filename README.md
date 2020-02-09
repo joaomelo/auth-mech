@@ -69,7 +69,7 @@ First, initialize firebase as usual then add an additional step to create the `A
 
     import * as firebase from 'firebase/app';
     import 'firebase/auth';
-    import { AuthMachine } from '@joaomelo/auth-machine';
+    import { AuthMachine } from '@joaomelo/fireauth-machine';
 
     const fireApp = firebase.initializeApp({
       // config data
