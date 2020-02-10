@@ -171,11 +171,11 @@ This way, every time the user state changes, Vue will automatically switch to th
 
 ### Firebase Auth is Still There, Don't Worry!
 
-There is no ambition to create a facade over the firebase auth. If you want to use any of the service properties and methods you can reach for the auth object. You access it by the `service` property in the `authMachine` object. In a dummy home page, we can do that to show the user email and call the `signOut` method in a button. Check it out:
+There is no ambition to create a facade over the firebase auth. The only copied state from fireauth is the user. This make easier to build reactive UI with frameworks like Vue or React. Any other properties or methods you want to use from firebase auth service are reachable by the `service` property in the `authMachine` object. In a dummy home page, for example, we can do the `signOut` from a button. Check it out:
 
     <template>
       <div>
-        <p>welcome {{ authMachine.service.currentUser.email }}</p>
+        <p>welcome {{ authMachine.user.email }}</p>
         <button @click.prevent="signOut">
           sign out
         </button>

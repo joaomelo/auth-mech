@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>welcome {{ authMachine.service.currentUser.email }}</p>
+    <p>welcome {{ authMachine.user.email }}</p>
     <button @click.prevent="signOut">
       signOut
     </button>
