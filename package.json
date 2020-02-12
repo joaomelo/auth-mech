@@ -72,8 +72,6 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
-    "@joaomelo/bus": "^1.1.2",
-    "core-js": "^3.6.4",
-    "regenerator-runtime": "^0.13.3"
+    "@joaomelo/bus": "^1.1.2"
   }
 }
