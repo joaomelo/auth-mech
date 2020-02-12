@@ -49,17 +49,17 @@
     "eslint-config-standard": "^14.1.0",
     "eslint-loader": "^3.0.3",
     "eslint-plugin-import": "^2.20.1",
-    "eslint-plugin-jest": "^23.6.0",
+    "eslint-plugin-jest": "^23.7.0",
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "eslint-plugin-vue": "^6.1.2",
     "eslint-plugin-vue-libs": "^4.0.0",
     "fibers": "^4.0.2",
-    "firebase": "^7.8.0",
+    "firebase": "^7.8.1",
     "html-webpack-plugin": "^3.2.0",
     "jest": "^24.9.0",
-    "rimraf": "^3.0.1",
+    "rimraf": "^3.0.2",
     "sass": "^1.25.1-test.1",
     "sass-loader": "^8.0.2",
     "style-loader": "^1.1.3",
@@ -67,11 +67,12 @@
     "vue-loader": "^15.8.3",
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.6.11",
-    "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.10.2"
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
+    "@joaomelo/bus": "^1.1.2",
     "core-js": "^3.6.4",
     "regenerator-runtime": "^0.13.3"
   }

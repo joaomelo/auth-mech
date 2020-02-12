@@ -65,7 +65,7 @@ Install with npm.
 
 ### Getting Started
 
-First, initialize firebase as usual then add an additional step to create the `AuthMachine` object passing the firebase Auth instance. One or more callbacks can optionally be passed as the second argument if you want them called in any auth state change.
+First, initialize firebase as usual then add an additional step to create the `AuthMachine` object passing the firebase Auth instance.
 
     import * as firebase from 'firebase/app';
     import 'firebase/auth';
@@ -74,9 +74,18 @@ First, initialize firebase as usual then add an additional step to create the `A
     const fireApp = firebase.initializeApp({
       // config data
     });
-    const fireAuth = fireApp.auth();
 
-    const authStateChangeCallback = ({user, status}) => {
+    const fireAuth = fireApp.auth();
+    const authMachine = new AuthMachine(fireAuth) 
+    export { authMachine }
+
+### Subscribe to Auth State changes
+
+You can set any number of callbacks to be called when auth state changes. The current user and the status flag will be passed to every function inside a payload object.
+
+    import { authMachine } from './foobar';
+
+    const adjusteRoute = ({user, status}) => {
         if (status === 'LOGGEDIN') {
           // User is signed in.
           // Now we should route to home page.
@@ -85,25 +94,18 @@ First, initialize firebase as usual then add an additional step to create the `A
           // Let's get out to the login form.
         }
       }
+    authMachine.subscribe(adjusteRoute)
 
-    const anotherCallback = () => console.log('auth state changed')
+    const dummyCallback = ({status}) => console.log(`auth state changed to ${status}`)
+    authMachine.subscribe(dummyCallback)
 
-    // you can pass multiple callbacks inside an array
-    const authMachine = new AuthMachine(fireAuth, [authStateChangeCallback, anotherCallback]) 
-
-    // pass just one callback
-    // const authMachine = new AuthMachine(fireAuth, authStateChangeCallback) 
-
-    // or none
-    // const authMachine = new AuthMachine(fireAuth) 
-
-    export { authMachine }
+Every call to the `subscribe` method will return an `unsubscribe` function. You can call it to terminate the contract.
 
 ### The Callback Can Be Old News
 
 But if you are building reactive UIs with something like Vue, React, Angular or Svelte, you probably don't need the callback anymore.
 
-I will use Vue to exemplify this because it is where I am most comfortable. But, this can be achieved even with vanilla js.
+I will use Vue to exemplify because it is where I am most comfortable. But, this can be achieved even with vanilla js.
 
 Let's start by creating our Vue app:
 
@@ -201,7 +203,7 @@ There is no ambition to create a facade over the firebase auth. The only copied 
 
 ## Wrapping up
 
-So to use the package you import the `AuthMachine` class and create instantiate an object passing the fireauth reference. Then, you can access the the user status by the `status` property and all fireauth functionality trough the `service` property. Simple as that.
+So to use the package you import the `AuthMachine` class and create instantiate an object passing the fireauth reference. Then, you can (1) access the user and user status by the `user` and `status` properties and (2) subscribe to auth state change events passing callbacks to the `subscribe` method. All fireauth functionality is accessible trough the `service` property. Simple as that.
 
 ## Using the Demo
 

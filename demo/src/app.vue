@@ -1,9 +1,22 @@
 <template>
-  <div class="container">
-    <component
-      :is="page"
-      :auth-machine="authMachine"
-    />
+  <div>
+    <div class="container">
+      <component
+        :is="page"
+        :auth-machine="authMachine"
+      />
+    </div>
+    <ul>
+      <li style="font-weight: bold">
+        auth-machine events triggered:
+      </li>
+      <li
+        v-for="(log, index) in logs"
+        :key="index"
+      >
+        {{ log.when }}: {{ log.email }} | {{ log.status }}
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -17,7 +30,10 @@ import { authMachine } from './auth';
 export default {
   name: 'App',
   data () {
-    return { authMachine };
+    return {
+      authMachine,
+      logs: []
+    };
   },
   computed: {
     page () {
@@ -28,6 +44,19 @@ export default {
       };
 
       return components[this.authMachine.status];
+    }
+  },
+  created () {
+    this.authMachine.subscribe(this.addLog);
+  },
+  methods: {
+    addLog ({ user, status }) {
+      const log = {
+        when: Date.now(),
+        email: user ? user.email : 'none',
+        status
+      };
+      this.logs.push(log);
     }
   }
 };
