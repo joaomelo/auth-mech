@@ -11,8 +11,8 @@
         auth-machine events triggered:
       </li>
       <li
-        v-for="(log, index) in logs"
-        :key="index"
+        v-for="log in logs"
+        :key="log.when"
       >
         {{ log.when }}: {{ log.email }} | {{ log.status }}
       </li>
