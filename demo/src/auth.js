@@ -1,9 +1,10 @@
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
+import 'firebase/firestore';
 
-import { AuthMachine } from '__lib';
+import { FireauthMachine } from '__lib'; // @joaomelo/fireauth-machine
 
-const fireApp = firebase.initializeApp({
+const fireapp = firebase.initializeApp({
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
   databaseURL: process.env.FIREBASE_DATABASE_URL,
@@ -13,5 +14,10 @@ const fireApp = firebase.initializeApp({
   appId: process.env.FIREBASE_APP_ID
 });
 
-const authMachine = new AuthMachine(fireApp.auth());
-export { authMachine };
+const auth = fireapp.auth();
+
+const db = fireapp.firestore();
+const profiles = db.collection('profiles');
+
+const fireauthMachine = new FireauthMachine(auth, { pushTo: profiles });
+export { fireauthMachine };

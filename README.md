@@ -55,35 +55,33 @@ That is how this package was born. I decided some sort of state machine was need
 
 ## Usage
 
-The library provides a way to create an `AuthMachine` object which will track and expose the user auth state as `'UNSOLVED'`, `'SIGNIN'` or `'SIGNOUT'`. This will make reactive UIs slightly easier to build.
+The library provides a way to create an `FireauthMachine` object which will track and expose the user auth state as `'UNSOLVED'`, `'SIGNIN'` or `'SIGNOUT'`. This will make reactive UIs slightly easier to build.
 
-### Installation
+### Getting Started
 
 Install with npm.
 
     npm install @joaomelo/fireauth-machine
 
-### Getting Started
-
-First, initialize firebase as usual then add an additional step to create the `AuthMachine` object passing the firebase Auth instance.
+First, initialize firebase as usual then add an additional step to create the `FireauthMachine` object passing the firebase Auth instance.
 
     import * as firebase from 'firebase/app';
     import 'firebase/auth';
-    import { AuthMachine } from '@joaomelo/fireauth-machine';
+    import { FireauthMachine } from '@joaomelo/fireauth-machine';
 
     const fireApp = firebase.initializeApp({
       // config data
     });
 
     const fireAuth = fireApp.auth();
-    const authMachine = new AuthMachine(fireAuth) 
-    export { authMachine }
+    const fireauthMachine = new FireauthMachine(fireAuth) 
+    export { fireauthMachine }
 
 ### Subscribe to Auth State changes
 
 You can set any number of callbacks to be called when auth state changes. The current user and the status flag will be passed to every function inside a payload object.
 
-    import { authMachine } from './foobar';
+    import { fireauthMachine } from './foobar';
 
     const adjusteRoute = ({user, status}) => {
         if (status === 'LOGGEDIN') {
@@ -94,10 +92,10 @@ You can set any number of callbacks to be called when auth state changes. The cu
           // Let's get out to the login form.
         }
       }
-    authMachine.subscribe(adjusteRoute)
+    fireauthMachine.subscribe(adjusteRoute)
 
     const dummyCallback = ({status}) => console.log(`auth state changed to ${status}`)
-    authMachine.subscribe(dummyCallback)
+    fireauthMachine.subscribe(dummyCallback)
 
 Every call to the `subscribe` method will return an `unsubscribe` function. You can call it to terminate the contract.
 
@@ -125,21 +123,21 @@ Then we can initialize firebase auth service and our state machine:
     import * as firebase from 'firebase/app';
     import 'firebase/auth';
 
-    import { AuthMachine } from '@joaomelo/fireauth-machine';
+    import { FireauthMachine } from '@joaomelo/fireauth-machine';
 
     const fireApp = firebase.initializeApp({
       //you firebase project config = data
     });
 
-    const authMachine = new AuthMachine(fireApp.auth());
-    export { authMachine };
+    const fireauthMachine = new FireauthMachine(fireApp.auth());
+    export { fireauthMachine };
 
-Cool. Now, inside our Vue main component, we can leverage the state machine to show the appropriate UI. To access the current auth state you just need to reference the `status` property of the `authMachine` you created. Like this:
+Cool. Now, inside our Vue main component, we can leverage the state machine to show the appropriate UI. To access the current auth state you just need to reference the `status` property of the `fireauthMachine` you created. Like this:
 
     <template>
         <component
           :is="page"
-          :auth-machine="authMachine"
+          :fireauth-machine="fireauthMachine"
         />
     </template>
 
@@ -148,12 +146,12 @@ Cool. Now, inside our Vue main component, we can leverage the state machine to s
     import PageLogin from './page-login';
     import PageLoading from './page-solving';
 
-    import { authMachine } from './auth';
+    import { fireauthMachine } from './auth';
 
     export default {
       name: 'App',
       data () {
-        return { authMachine };
+        return { fireauthMachine };
       },
       computed: {
         page () {
@@ -163,7 +161,7 @@ Cool. Now, inside our Vue main component, we can leverage the state machine to s
             SIGNOUT: PageLogin
           };
 
-          return components[this.authMachine.status];
+          return components[this.fireauthMachine.status];
         }
       }
     };
@@ -173,11 +171,11 @@ This way, every time the user state changes, Vue will automatically switch to th
 
 ### Firebase Auth is Still There, Don't Worry!
 
-There is no ambition to create a facade over the firebase auth. The only copied state from fireauth is the user. This make easier to build reactive UI with frameworks like Vue or React. Any other properties or methods you want to use from firebase auth service are reachable by the `service` property in the `authMachine` object. In a dummy home page, for example, we can do the `signOut` from a button. Check it out:
+There is no ambition to create a facade over the firebase auth. The only copied state from fireauth is the user. This make easier to build reactive UI with frameworks like Vue or React. Any other properties or methods you want to use from firebase auth service are reachable by the `service` property in the `fireauthMachine` object. In a dummy home page, for example, we can do the `signOut` from a button. Check it out:
 
     <template>
       <div>
-        <p>welcome {{ authMachine.user.email }}</p>
+        <p>welcome {{ fireauthMachine.user.email }}</p>
         <button @click.prevent="signOut">
           sign out
         </button>
@@ -188,22 +186,44 @@ There is no ambition to create a facade over the firebase auth. The only copied 
     export default {
       name: 'PageHome',
       props: {
-        authMachine: {
+        fireauthMachine: {
           type: Object,
           required: true
         }
       },
       methods: {
         signOut () {
-          this.authMachine.service.signOut();
+          this.fireauthMachine.service.signOut();
         }
       }
     };
     </script>
 
+## Keep the User List in Firestore
+
+The auth service has constraints that make it a non ideal service to handle user preferences. If you choose [Firestore](https://firebase.google.com/docs/firestore) to manage that extra user data, fireauth-machine can give you a hand with that. It make sure users have a corresponding document in the Firestore collection of your choice.
+
+The FireauthMachine constructor accepts a optional second parameter. You can pass a options object with the property `pushTo` with a Firestore collection reference as value. By activating this behavior, every time a user Login the FireauthMachine will check if exists a document on that collection with the same id as the user. If the document isn't found, the FireauthMachine will create it with an email field filled. Let's see that in code:
+
+    import * as firebase from 'firebase/app';
+    import 'firebase/auth';
+    import 'firebase/firestore';
+    import { FireauthMachine } from @joaomelo/fireauth-machine
+
+    const fireapp = firebase.initializeApp({
+      // config data
+    });
+
+    const auth = fireapp.auth();
+    const db = fireapp.firestore();
+    const profiles = db.collection('profiles');
+
+    const fireauthMachine = new FireauthMachine(auth, { pushTo: profiles });
+    export { fireauthMachine };
+
 ## Wrapping up
 
-So to use the package you import the `AuthMachine` class and create instantiate an object passing the fireauth reference. Then, you can (1) access the user and user status by the `user` and `status` properties and (2) subscribe to auth state change events passing callbacks to the `subscribe` method. All fireauth functionality is accessible trough the `service` property. Simple as that.
+So to use the package you import the `FireauthMachine` class and create instantiate an object passing the fireauth reference. Then, you can (1) access the user and user status by the `user` and `status` properties and (2) subscribe to auth state change events passing callbacks to the `subscribe` method. All fireauth functionality is accessible trough the `service` property. Simple as that.
 
 ## Using the Demo
 

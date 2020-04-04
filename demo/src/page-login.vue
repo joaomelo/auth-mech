@@ -23,7 +23,7 @@
 export default {
   name: 'PageLogin',
   props: {
-    authMachine: {
+    fireauthMachine: {
       type: Object,
       required: true
     }
@@ -36,10 +36,10 @@ export default {
   },
   methods: {
     login () {
-      this.authMachine.service.signInWithEmailAndPassword(this.email, this.password);
+      this.fireauthMachine.service.signInWithEmailAndPassword(this.email, this.password);
     },
     register () {
-      this.authMachine.service.createUserWithEmailAndPassword(this.email, this.password);
+      this.fireauthMachine.service.createUserWithEmailAndPassword(this.email, this.password);
     }
   }
 };

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>welcome {{ authMachine.user.email }}</p>
+    <p>welcome {{ fireauthMachine.user.email }}</p>
     <button @click.prevent="signOut">
       signOut
     </button>
@@ -11,14 +11,14 @@
 export default {
   name: 'PageHome',
   props: {
-    authMachine: {
+    fireauthMachine: {
       type: Object,
       required: true
     }
   },
   methods: {
     signOut () {
-      this.authMachine.service.signOut();
+      this.fireauthMachine.service.signOut();
     }
   }
 };

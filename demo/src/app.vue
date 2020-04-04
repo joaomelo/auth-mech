@@ -3,12 +3,12 @@
     <div class="container">
       <component
         :is="page"
-        :auth-machine="authMachine"
+        :fireauth-machine="fireauthMachine"
       />
     </div>
     <ul>
       <li style="font-weight: bold">
-        auth-machine events triggered:
+        fireauth-machine events triggered:
       </li>
       <li
         v-for="log in logs"
@@ -25,13 +25,13 @@ import PageHome from './page-home';
 import PageLogin from './page-login';
 import PageSolving from './page-solving';
 
-import { authMachine } from './auth';
+import { fireauthMachine } from './auth';
 
 export default {
   name: 'App',
   data () {
     return {
-      authMachine,
+      fireauthMachine,
       logs: []
     };
   },
@@ -43,17 +43,17 @@ export default {
         SIGNOUT: PageLogin
       };
 
-      return components[this.authMachine.status];
+      return components[this.fireauthMachine.status];
     }
   },
   created () {
-    this.authMachine.subscribe(this.addLog);
+    this.fireauthMachine.subscribe(this.addLog);
   },
   methods: {
     addLog ({ user, status }) {
       const log = {
-        when: Date.now(),
-        email: user ? user.email : 'none',
+        when: (new Date()).toISOString(),
+        email: user ? user.email : 'no user',
         status
       };
       this.logs.push(log);
