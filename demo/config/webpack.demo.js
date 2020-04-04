@@ -13,13 +13,13 @@ const lib = path.resolve(__dirname, '../../lib/src');
 
 module.exports = {
   mode: 'development',
+  devtool: 'source-map',
   entry: ['./demo/src/index.js'],
   output: {
     publicPath: '/',
     path: dist,
     filename: 'bundle.js'
   },
-  devtool: 'source-map',
   resolve: {
     alias: {
       __src: src,
