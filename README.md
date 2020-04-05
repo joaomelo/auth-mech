@@ -203,7 +203,7 @@ There is no ambition to create a facade over the firebase auth. The only copied 
 
 The auth service has constraints that make it a non ideal service to handle user preferences. If you choose [Firestore](https://firebase.google.com/docs/firestore) to manage that extra user data, fireauth-machine can give you a hand with that. It make sure users have a corresponding document in the Firestore collection of your choice.
 
-The FireauthMachine constructor accepts a optional second parameter. You can pass a options object with the property `pushTo` with a Firestore collection reference as value. By activating this behavior, every time a user Login the FireauthMachine will check if exists a document on that collection with the same id as the user. If the document isn't found, the FireauthMachine will create it with an email field filled. Let's see that in code:
+The FireauthMachine constructor accepts a optional second parameter. You can pass a options object with the property `pushTo` with a Firestore collection reference as value. By activating this behavior, every time a user Login the FireauthMachine will check if exists a document on that collection with the same id as the user. If the document isn't found, the FireauthMachine will create it with an `userId` and `email` fields filled. Let's see that in code:
 
     import * as firebase from 'firebase/app';
     import 'firebase/auth';
