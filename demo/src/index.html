@@ -8,30 +8,34 @@
 </head>
 
 <body>
-  <main>
-    <form>
-      <input
-        id="email"
-        type="email"
-        placeholder="type email..."
-      >
-      <input
-        id="password"
-        type="password"
-        placeholder="type password..."
-      >
-      <button id="register">
-        register
-      </button>
-      <button id="login">
-        login
-      </button>    
-      <button id="logout">
-        logout
-      </button>    
-    </form>
-    <div id="msg"></div>
-  </main>
+  <div class="container">
+    <main>
+      <form>
+        <input
+          id="email"
+          type="email"
+          placeholder="type email..."
+        >
+        <input
+          id="password"
+          type="password"
+          placeholder="type password..."
+        >
+        <div class="actions">
+          <button id="register">
+            register
+          </button>
+          <button id="login">
+            login
+          </button>    
+          <button id="logout">
+            logout
+          </button>      
+        </div>
+      </form>
+      <div id="msg" class="msg"></div>
+    </main>  
+  </div>
 </body>
 
 </html>

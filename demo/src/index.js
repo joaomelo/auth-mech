@@ -1,3 +1,4 @@
+import './styles.css';
 import { authMech } from './auth';
 
 authMech.subscribe(payload => {
