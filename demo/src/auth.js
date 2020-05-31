@@ -2,7 +2,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 
-import { FireauthMachine } from '__lib'; // @joaomelo/fireauth-machine
+import { AuthMech } from '__lib'; // @joaomelo/fireauth-machine
 
 const fireapp = firebase.initializeApp({
   apiKey: process.env.FIREBASE_API_KEY,
@@ -15,8 +15,9 @@ const fireapp = firebase.initializeApp({
 });
 
 const auth = fireapp.auth();
-const db = fireapp.firestore();
-const profiles = db.collection('profiles');
+// const db = fireapp.firestore();
+// const profiles = db.collection('profiles');
 
-const fireauthMachine = new FireauthMachine(auth, { pushTo: profiles });
-export { fireauthMachine };
+const authMech = new AuthMech({ service: auth });
+
+export { authMech };

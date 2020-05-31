@@ -4,11 +4,34 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <title>fireauth-machine demo</title>
+  <title>auth-mech demo</title>
 </head>
 
 <body>
-  <div id="app"></div>
+  <main>
+    <form>
+      <input
+        id="email"
+        type="email"
+        placeholder="type email..."
+      >
+      <input
+        id="password"
+        type="password"
+        placeholder="type password..."
+      >
+      <button id="register">
+        register
+      </button>
+      <button id="login">
+        login
+      </button>    
+      <button id="logout">
+        logout
+      </button>    
+    </form>
+    <div id="msg"></div>
+  </main>
 </body>
 
 </html>
