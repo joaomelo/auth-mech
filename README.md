@@ -232,11 +232,7 @@ const fireauth = authMech.options.service;
 // ...
 ```
 
-## Wrapping up
-
-So to use the package you import the `AuthMech` class and create instantiate an object passing the fireauth reference. Then, you can (1) access the user and user status by the `user` and `status` properties and (2) subscribe to auth state change events passing callbacks to the `subscribe` method. All fireauth functionality is accessible trough the `service` property. Simple as that.
-
-## Using the Demo
+# Using the Demo
 
 There is a demo app you can play to explore what I said here. Start by cloning the repository.
 
@@ -261,4 +257,4 @@ Thank you and have fun 🎉.
 
 ## License
 
-Made by [João Melo](https://www.linkedin.com/in/joaomelo81/?locale=en_US) and licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details/
+Made by [João Melo](https://twitter.com/joaomeloplus) and licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

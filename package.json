@@ -21,11 +21,11 @@
     "url": "git+https://github.com/joaomelo/auth-mech.git"
   },
   "keywords": [
-    "firebase",
-    "fireauth",
-    "ui",
     "authentication",
-    "user"
+    "user",
+    "firebase",
+    "firestore",
+    "firebase-auth"
   ],
   "author": "joão melo",
   "license": "GPL-3.0",
