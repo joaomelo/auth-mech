@@ -1,0 +1,25 @@
+name: bump and publish
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "actions/checkout@v2"
+        with:
+          ref: ${{ github.ref }}
+      - run: cat ./package.json
+      - uses: "actions/setup-node@v1"
+        with:
+          node-version: 12
+      - name: "version bump"
+        uses: "phips28/gh-action-bump-version@master"
+        with:
+          tag-prefix: ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: cat ./package.json

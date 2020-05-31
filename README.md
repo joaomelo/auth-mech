@@ -255,6 +255,6 @@ Then, install the dependencies and run the start script:
 
 Thank you and have fun 🎉.
 
-## License
+# License
 
 Made by [João Melo](https://twitter.com/joaomeloplus) and licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
