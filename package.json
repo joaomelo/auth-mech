@@ -14,9 +14,7 @@
     "bump:patch": "npm run pack && npm version patch && npm run push",
     "bump:minor": "npm run pack && npm version minor && npm run push",
     "bump:major": "npm run pack && npm version major && npm run push",
-    "release:patch": "npm run bump:patch && npm publish --access public",
-    "release:minor": "npm run bump:minor && npm publish --access public",
-    "release:major": "npm run bump:major && npm publish --access public"
+    "deploy": "npm publish --access public"
   },
   "repository": {
     "type": "git",
