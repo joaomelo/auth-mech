@@ -87,6 +87,9 @@ function addMsg (msgStr) {
   el('msg').insertBefore(p, el('msg').firstChild);
 };
 
-function displayEls (query, value) {
-  els(query).forEach(el => { el.style.display = value; });
+function displayEls (queryParam, value) {
+  const queries = Array.isArray(queryParam) ? queryParam : [queryParam];
+  queries.forEach(query => {
+    els(query).forEach(el => { el.style.display = value; });
+  });
 }
