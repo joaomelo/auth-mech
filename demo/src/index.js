@@ -2,62 +2,50 @@ import './styles.css';
 import { authMech } from './auth';
 
 authMech.subscribe(payload => {
-  const functionsForStatus = {
+  const renderFunctions = {
     UNSOLVED: renderLoading,
     SIGNEDOUT: renderLogin,
     UNVERIFIED: renderUnverified,
     SIGNEDIN: renderSignedIn
   };
 
-  displayEls('.auth', 'none');
-  const f = functionsForStatus[payload.status];
-  f(payload);
+  const render = renderFunctions[payload.status];
+  render();
 });
 
 // setting up buttons
+el('signUp').onclick = () => authMech
+  .signUp(val('email'), val('password'))
+  .then(result => addMsg(result.message));
 
-el('signUp').onclick = () => {
-  authMech
-    .signUp(val('email'), val('password'))
-    .then(result => addMsg(result.message));
-};
+el('resendEmail').onclick = () => authMech
+  .sendEmailVerification()
+  .then(result => addMsg(result.message));
 
-el('resendEmail').onclick = () => {
-  authMech
-    .sendEmailVerification()
-    .then(result => addMsg(result.message));
-};
+el('signIn').onclick = () => authMech
+  .signIn(val('email'), val('password'))
+  .then(result => addMsg(result.message));
 
-el('signIn').onclick = () => {
-  authMech
-    .signIn(val('email'), val('password'))
-    .then(result => addMsg(result.message));
-};
+el('signOut').onclick = () => authMech
+  .signOut()
+  .then(() => addMsg('user signed out'));
 
-el('signOut').onclick = () => {
-  authMech
-    .signOut()
-    .then(() => addMsg('user signed out'));
-};
+el('updateEmail').onclick = () => authMech
+  .updateEmail(val('email'), val('password'))
+  .then(result => addMsg(result.message));
 
-el('updateEmail').onclick = () => {
-  authMech
-    .updateEmail(val('email'), val('password'))
-    .then(result => addMsg(result.message));
-};
-
-el('updatePassword').onclick = () => {
-  authMech
-    .updatePassword(val('newPassword'), val('password'))
-    .then(result => addMsg(result.message));
-};
+el('updatePassword').onclick = () => authMech
+  .updatePassword(val('newPassword'), val('password'))
+  .then(result => addMsg(result.message));
 
 // routing
 function renderLoading () {
+  displayEls('.auth', 'none');
   addMsg('loading...');
 }
 
 function renderLogin () {
+  displayEls('.auth', 'none');
   displayEls('#email', 'block');
   displayEls('#password', 'block');
   displayEls('#signUp', 'inline-block');
@@ -66,11 +54,13 @@ function renderLogin () {
 }
 
 function renderUnverified () {
+  displayEls('.auth', 'none');
   displayEls('#resendEmail', 'inline-block');
   addMsg(`please verify ${authMech.state.userData.email}`);
 }
 
 function renderSignedIn () {
+  displayEls('.auth', 'none');
   displayEls('input', 'block');
   displayEls('#updateEmail', 'inline-block');
   displayEls('#updatePassword', 'inline-block');

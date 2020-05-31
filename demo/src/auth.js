@@ -2,7 +2,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 
-import { AuthMech } from '__lib'; // @joaomelo/fireauth-machine
+import { AuthMech } from '__lib'; // @joaomelo/auth-mech
 
 const fireapp = firebase.initializeApp({
   apiKey: process.env.FIREBASE_API_KEY,

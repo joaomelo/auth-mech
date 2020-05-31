@@ -1,12 +1,12 @@
 {
   "name": "@joaomelo/auth-mech",
-  "version": "3.0.1",
-  "description": "abstracts authentication state from firebase auth module making easier to develop reactive auth ui",
+  "version": "0.1.1",
+  "description": "Complements Firebase auth with opinionated approaches to observation of auth state changes, treat email verification as default and fuse user data from auth with an arbitrary collection in Firestore.",
   "main": "lib/dist/index.js",
   "scripts": {
     "start": "npm run dev",
     "dev": "webpack-dev-server --config demo/cfg/webpack.config.js",
-    "lint": "eslint --ext .js lib/src",
+    "lint": "eslint */src/**/*.js",
     "build": "rimraf lib/dist/* && webpack --config lib/cfg/webpack.config.js",
     "commit": "git add -A && git commit",
     "push": "git push && git push --tags",

@@ -1,12 +1,12 @@
 # Auth-mech
 
-Abstracts authentication state from firebase auth module making easier to develop reactive auth UI.
+Complements Firebase auth with opinionated approaches to observation of auth state changes, treat email verification as default and fuse user data from auth with an arbitrary collection in Firestore.
 
 ## Motivation
 
-[Firebase](https://firebase.google.com/) is awesome. It makes so easier for solo developers and small teams to build software with agility. And one of its main conveniences is the authentication module. You can read everything about it [here](https://firebase.google.com/docs/auth).
+[Firebase](https://firebase.google.com/) is awesome. It makes easier for solo developers and small teams to build software with agility. One of its main conveniences is the authentication module. You can check everything about it [here](https://firebase.google.com/docs/auth).
 
-After a few times building login UI with firebase auth, I found myself repeating code to wrap or complement Firebase auth features. I decided to write this library to improve reusability and reduce bugs mainly to these use cases:
+After a few times building login UI with Firebase auth, I found myself repeating code to wrap or complement Firebase auth features. I decided to write this library to improve reusability and reduce bugs mainly to these use cases:
 
 ### General Observability of Authentication State.
 
@@ -18,7 +18,9 @@ Although not enforced by Firebase, i find important to avoid abusing behavior fr
 
 ### Auto Link to a Firestore collection
 
-Firebase auth is not a good place to store user like preferences or profile. To do that you will need to create a collection in Firestore. Auth-mech takes the heavy lifting abstracting a fusion between the auth engine and the given collection. 
+*THIS FEATURE IS STILL IN DEVELOPMENT, DO NOT CONSIDER IT YET AS REASON TO USE THE LIBRARY.*
+
+Firebase auth is not the best of places to store user like preferences or profile. To do that you will need to create a collection in Firestore. Auth-mech takes the heavy lifting abstracting a fusion between the auth engine and the given collection. 
 
 But code is the more eloquent way to explain all this. Let me show how to get started.
 
@@ -47,139 +49,155 @@ export { authMech }
 
 Now you are good to go about using auth-mech features 😏.
 
-## Auth State
+## Reading Auth State
 
-Auth-mech abstracts four auth states: `'UNSOLVED'`, `'SIGNEDOUT'`, `'UNVERIFIED'`, `'SIGNEDIN'`. The first one is the default initial state. It will hold until Firebase auth resolves the login status and is usefull to show a loading screen for example.
+Auth-mech abstracts four auth states: `'UNSOLVED'`, `'SIGNEDOUT'`, `'UNVERIFIED'`, `'SIGNEDIN'`. 
 
-The others are determined by the most recent user object provided by Firebase auth. The `'SIGNEDOUT'` value is quite obvious. 
+The first one is the default initial state. It will hold until Firebase auth resolves the login status. `'UNSOLVED'` is useful to control a start loading screen, for example. The others states are determined by the most recent user object provided by Firebase auth. 
 
-The choice between `'UNVERIFIED'` and `'SIGNEDIN'` is determined by if the current user verified its email That is useful, for example, for routing. You can send users to a pending verifications email or the default signed in page, depending on this status.
+While `'SIGNEDOUT'` value is quite obvious, the choice between `'UNVERIFIED'` and `'SIGNEDIN'` is determined by if the current user verified its email. That is useful, for example, for routing. You can send users to a pending verifications email screen or the default signed in page.
 
-There are two ways to access the auth status: subscribing to auth state changes or syncournously reading the most recent state in a property on the AuthMech instance. 
+There are two ways to access the auth status: subscribing to auth state changes or synchronously reading the most recent state in a property on the AuthMech instance. 
 
 ### Subscribing to Auth Changes
 
-You can set any number of observers functions to be called when auth state changes. The current user and the status values will be passed inside a payload object. The example bellow is extracted from the demo app available in the library repository. It shows a adequate html code depeding on the state.
+To listen to auth state changes, you pass a observer function to the `subscribe` method in the AuthMech instance. The current user data and status values will be passed inside a payload object to the observer functions every time auth state changes. 
 
-    import { authMech } from './foobar';
+The example bellow is adapted from the demo app available in the library (repository)[https://github.com/joaomelo/auth-mech]. It renders adequate Html depending on the state.
 
-    const adjusteRoute = ({user, status}) => {
-        if (status === 'LOGGEDIN') {
-          // User is signed in.
-          // Now we should route to home page.
-        } else {
-          // User is signed out.
-          // Let's get out to the login form.
-        }
-      }
-    authMech.subscribe(adjusteRoute)
+``` js
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/firestore';
+import { AuthMech } from '@joaomelo/auth-mech'
 
-    const dummyCallback = ({status}) => console.log(`auth state changed to ${status}`)
-    authMech.subscribe(dummyCallback)
+const fireapp = firebase.initializeApp({
+  // config data
+});
 
-Every call to the `subscribe` method will return an `unsubscribe` function. You can call it to terminate the contract.
+const authMech = new AuthMech({ 
+  service: fireapp.auth() 
+});
 
-### The Callback Can Be Old News
+authMech.subscribe(payload => {
+  const renderFunctions = {
+    UNSOLVED: renderLoading,
+    SIGNEDOUT: renderLogin,
+    UNVERIFIED: renderUnverified,
+    SIGNEDIN: renderSignedIn
+  };
 
-But if you are building reactive UIs with something like Vue, React, Angular or Svelte, you probably don't need the callback anymore.
+  const render = renderFunctions[payload.status];
+  render(payload);
+});
+```
 
-I will use Vue to exemplify because it is where I am most comfortable. But, this can be achieved even with vanilla js.
+The `subscribe` method returns an `unsubscribe` function. You can call it to terminate the contract.
 
-Let's start by creating our Vue app:
+### An Auth State Store
 
-    // index.js
-    import Vue from 'vue';
-    import App from './app.vue';
+For some reason you might not want to read data from a asynchronous event driven approach like youwe did with the subscribe `method`.
 
-    const vueApp = new Vue({
-      render: h => h(App)
-    });
+Maybe you just need the last user data to show a message or if you are building reactive UIs you want to proxy setter and getters like the Vue framework does.
 
-    vueApp.$mount('#app');
+For those cases the AuthMech instance has a `state` property that works like a data store. Inside that property you will always find an `userData` and `status` sub-properties updated with the latest auth state.
 
-Then we can initialize firebase auth service and our state machine:
+Building upon the last section example, a function to render a simple unverified user email screen could be like that. 
 
-    // auth.js
-    import * as firebase from 'firebase/app';
-    import 'firebase/auth';
+``` js
+// initialization code
+const authMech = new AuthMech({ 
+  service: fireapp.auth() 
+});
+// ...
+// after 'UNVERIFIED' state is determined 
+// this function could be called
+function renderUnverified () {
+  const email = authMech.state.userData.email;
+  const el = document.getElementById('container')
+  el.innerHTML = `
+    <button id="resendEmail">
+      Resend Email
+    </button>      
+    <p>please verify ${email}</p>  
+  `;
+}
+```
 
-    import { AuthMech } from '@joaomelo/auth-mech';
+The `userData` object will hold what the standard Firebase auth [user](https://firebase.google.com/docs/reference/js/firebase.User#properties) would, plus a `emailLocalPart` property with the string email part before the "@" char. The userData is a simple data object without any methods.
 
-    const fireApp = firebase.initializeApp({
-      //you firebase project config = data
-    });
+# Auth Operations
 
-    const authMech = new AuthMech(fireApp.auth());
-    export { authMech };
+Auth-mech build a few auth operations on top of Firebase auth. Nothing fancy, but anyhow reduce repetition between apps. 
 
-Cool. Now, inside our Vue main component, we can leverage the state machine to show the appropriate UI. To access the current auth state you just need to reference the `status` property of the `authMech` you created. Like this:
+## Sign Methods with Email Verification
 
-    <template>
-        <component
-          :is="page"
-          :auth-mech="authMech"
-        />
-    </template>
+The first ones provided in `signUp` and `signIn` methods. They take email and password strings as parameters and return a Promise that will resolve in a object with a message property and a `isSuccess` property if no error happened.
 
-    <script>
-    import PageHome from './page-home';
-    import PageLogin from './page-login';
-    import PageLoading from './page-solving';
+SignUp will by default send a email verification. Until the user confirms his email, the auth state will be set to `'UNVERIFIED'` after successful `signIn`.
 
-    import { authMech } from './auth';
+If you ever need to send that email again, just call the `sendEmailVerification` method. It too will return a Promise that will resolve in a object with a message property.
 
-    export default {
-      name: 'App',
-      data () {
-        return { authMech };
-      },
-      computed: {
-        page () {
-          const components = {
-            UNSOLVED: PageLoading,
-            SIGNIN: PageHome,
-            SIGNOUT: PageLogin
-          };
+`AuthMech` instances also exposes a signOut method that will do exactly what Firebase auth does: sign out the user and return a Promise.
 
-          return components[this.authMech.status];
-        }
-      }
-    };
-    </script>
+If we had a page with buttons for those operations we could set their click behavior to something like this.
 
-This way, every time the user state changes, Vue will automatically switch to the correct page.
+``` js
+// helper functions
+const el = id => document.getElementById(id);
+const val = id => el(id).value;
+const addMsg = str => { el('msg').innerText = str; } ;
 
-### Firebase Auth is Still There, Don't Worry!
+// set buttons to take advantage if AuthMech methods
+// and log the operations resulting messages 
+el('signUp').onclick = () => authMech
+  .signUp(val('email'), val('password'))
+  .then(result => addMsg(result.message));
 
-There is no ambition to create a facade over the firebase auth. The only copied state from fireauth is the user. This make easier to build reactive UI with frameworks like Vue or React. Any other properties or methods you want to use from firebase auth service are reachable by the `service` property in the `authMech` object. In a dummy home page, for example, we can do the `signOut` from a button. Check it out:
+el('resendEmail').onclick = () => authMech
+  .sendEmailVerification()
+  .then(result => addMsg(result.message));
 
-    <template>
-      <div>
-        <p>welcome {{ authMech.user.email }}</p>
-        <button @click.prevent="signOut">
-          sign out
-        </button>
-      </div>
-    </template>
+el('signIn').onclick = () => authMech
+  .signIn(val('email'), val('password'))
+  .then(result => addMsg(result.message));
 
-    <script>
-    export default {
-      name: 'PageHome',
-      props: {
-        authMech: {
-          type: Object,
-          required: true
-        }
-      },
-      methods: {
-        signOut () {
-          this.authMech.service.signOut();
-        }
-      }
-    };
-    </script>
+el('signOut').onclick = () => authMech
+  .signOut()
+  .then(() => addMsg('user signed out'));
+```
 
-## Keep the User List in Firestore
+## Updating Email Credentials
+
+Firebase Auth supports updating email and password without providing user password. It maybe demands re-authentication based on the last time the user signed in.
+
+I find that behavior a little unpredictable and also think that users should also confirm password when doing those updates.
+
+AuthMech instances provide `updateEmail` and `updatePassword` methods. They take the new email or password string as first parameter and the current password as second.
+
+They will always attempt a re-authentication before updating and return a Promise resolving in that typical object with a message property and eventually a isSuccess property if everything went alright.
+
+updateEmail will also take advantage of Firebase User `verifyBeforeUpdateEmail` method. That is, the email will just really change after the user confirms an email message sent to her.
+
+As in our last example let's exercise how this methods could be implemented.
+
+``` js
+// helper functions
+const el = id => document.getElementById(id);
+const val = id => el(id).value;
+const addMsg = str => { el('msg').innerText = str; } ;
+
+el('updateEmail').onclick = () => authMech
+  .updateEmail(val('email'), val('password'))
+  .then(result => addMsg(result.message));
+
+el('updatePassword').onclick = () => authMech
+  .updatePassword(val('newPassword'), val('password'))
+  .then(result => addMsg(result.message));
+```
+
+## Keep More User Data in Firestore
+*THIS FEATURE IS STILL IN DEVELOPMENT, DO NOT USE IT YET.*
 
 The auth service has constraints that make it a non ideal service to handle user preferences. If you choose [Firestore](https://firebase.google.com/docs/firestore) to manage that extra user data, auth-mech can give you a hand with that. It make sure users have a corresponding document in the Firestore collection of your choice.
 
@@ -200,6 +218,19 @@ The AuthMech constructor accepts a optional second parameter. You can pass a opt
 
     const authMech = new AuthMech(auth, { pushTo: profiles });
     export { authMech };
+
+# Firebase is Still There
+
+Firebase auth is a powerful library and is reaseonable to asume that you will need to use it even if installing auth-mech library. 
+
+You can always export tha auth instance from wheteaver module you are initializing Firebase or, for conviniece sake access it from the AuthMech instance. If it is the case, it kept inside the `options` property, like so:
+
+``` js
+const fireauth = authMech.options.service;
+
+// here do advance stuff with fireauth methods 
+// ...
+```
 
 ## Wrapping up
 
