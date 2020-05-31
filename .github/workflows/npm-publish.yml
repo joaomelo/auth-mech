@@ -1,4 +1,4 @@
-name: bump and publish
+name: publish
 
 on:
   push:
