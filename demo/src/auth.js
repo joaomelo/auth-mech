@@ -15,7 +15,6 @@ const fireapp = firebase.initializeApp({
 });
 
 const auth = fireapp.auth();
-
 const db = fireapp.firestore();
 const profiles = db.collection('profiles');
 

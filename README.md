@@ -1,87 +1,67 @@
-# Fireauth Machine
+# Auth-mech
 
 Abstracts authentication state from firebase auth module making easier to develop reactive auth UI.
 
 ## Motivation
 
-[Firebase](https://firebase.google.com/) is awesome. It makes so easier for solo developers and small teams to build software with agility. And one of its main conveniences is the authentication module. You can read everything about it [here](https://firebase.google.com/docs/auth) and I will assume from now on that you have a basic understanding of it.
+[Firebase](https://firebase.google.com/) is awesome. It makes so easier for solo developers and small teams to build software with agility. And one of its main conveniences is the authentication module. You can read everything about it [here](https://firebase.google.com/docs/auth).
 
-After a few times building login UI with firebase auth, I found myself repeating the same code to wrap fireauth logic with authentication state abstraction. Let me show you the issue in detail.
+After a few times building login UI with firebase auth, I found myself repeating code to wrap or complement Firebase auth features. I decided to write this library to improve reusability and reduce bugs mainly to these use cases:
 
-The recommended approach to react to auth changes is to register a callback function (observer) in the `onAuthStateChanged` method from the auth object. Like this:
+### General Observability of Authentication State.
 
-    import * as firebase from 'firebase/app';
-    import 'firebase/auth';
+Firebase auth offers a `onAuthStateChanged` method to observe state changes. But if you need to check on those from many points in app code you will need to implement some sort of central event architecture. You will need to create logic to transform the parameters values from onAuthStateChanged into status values. Is to given, for example, if the user is logged off or the auth engine didn't resolve the user yet.   
 
-    const fireApp = firebase.initializeApp({
-      // config data
-    });
+### Opinionated Security Measures
 
-    fireApp.auth().onAuthStateChanged(user => {
-      if (user) {
-        // User is signed in.
-        // Now we could route to home page.
-      } else {
-        // User is signed out.
-        // Let's go back to the login form.
-      }
-    });
+Although not enforced by Firebase, i find important to avoid abusing behavior from malicious users to aks for email verification on sign up and email changes. Auth-mech also demands re-authentication at every email and password changes.
 
-This is cool and probably everything you will ever need. So we can end this chat right now. Best of luck 😄.
+### Auto Link to a Firestore collection
 
-But if you are still here... the first thing that caught my attention was the need to deal with the fact that the callback takes some time to execute. Based on the configuration and cached data, firebase will probably check if the user is already signed in. It will decide that first and just then, trigger the auth state change and run your registered callback.
+Firebase auth is not a good place to store user like preferences or profile. To do that you will need to create a collection in Firestore. Auth-mech takes the heavy lifting abstracting a fusion between the auth engine and the given collection. 
 
-The consequence is that you need to do something for your user during this time of unsolved status. Maybe run a spinner or show a "solving user message". A common approach to solve this would be to use a boolean variable:
+But code is the more eloquent way to explain all this. Let me show how to get started.
 
-    // firebase init code
-
-    let isUserSolved = false;
-    fireApp.auth().onAuthStateChanged(user => {
-      isUserSolved = true;
-      if (user) {
-        // User is signed in.
-        // Now we should route to home page.
-      } else {
-        // User is signed out.
-        // Let's get out to the login form.
-      }
-    });
-
-The variable `isUserSolved` can now be used by the UI to deal with that initial state. 
-
-But resilient architectures should avoid isolated booleans variables to represent software state. This can easily get code maintainability in trouble. The concept is beautifully distilled by David Khourshid in a magnificent [article](https://dev.to/davidkpiano/no-disabling-a-button-is-not-app-logic-598i) and also in a great podcast [episode](http://www.fullstackradio.com/130)
-
-That is how this package was born. I decided some sort of state machine was needed every time I dealt with firebase auth and wanted to avoid repeating code between apps. Even so, the code is short and unimpressive, seemed good sense to avoid bugs and keep things DRY.
-
-## Usage
-
-The library provides a way to create an `FireauthMachine` object which will track and expose the user auth state as `'UNSOLVED'`, `'SIGNIN'` or `'SIGNOUT'`. This will make reactive UIs slightly easier to build.
-
-### Getting Started
+## Getting Started
 
 Install with npm.
 
-    npm install @joaomelo/fireauth-machine
+    npm install @joaomelo/auth-mech
 
-First, initialize firebase as usual then add an additional step to create the `FireauthMachine` object passing the firebase Auth instance.
+First, initialize firebase as usual then add an additional step to create an auth-mech instance. The AuthMech's constructor takes as only parameter a config object. The service property of that object is the place to pass the reference to the Firebase auth object. See:
 
-    import * as firebase from 'firebase/app';
-    import 'firebase/auth';
-    import { FireauthMachine } from '@joaomelo/fireauth-machine';
+``` js
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
+import { AuthMech } from '@joaomelo/auth-mech';
 
-    const fireApp = firebase.initializeApp({
-      // config data
-    });
+const fireApp = firebase.initializeApp({
+  // config data
+});
 
-    const fireAuth = fireApp.auth();
-    const fireauthMachine = new FireauthMachine(fireAuth) 
-    export { fireauthMachine }
+authMech = new AuthMech({
+  service: fireApp.auth()
+});
+export { authMech }
+```
 
-### Subscribe to Auth State changes
+Now you are good to go about using auth-mech features 😏.
 
-You can set any number of callbacks to be called when auth state changes. The current user and the status flag will be passed to every function inside a payload object.
+## Auth State
 
-    import { fireauthMachine } from './foobar';
+Auth-mech abstracts four auth states: `'UNSOLVED'`, `'SIGNEDOUT'`, `'UNVERIFIED'`, `'SIGNEDIN'`. The first one is the default initial state. It will hold until Firebase auth resolves the login status and is usefull to show a loading screen for example.
+
+The others are determined by the most recent user object provided by Firebase auth. The `'SIGNEDOUT'` value is quite obvious. 
+
+The choice between `'UNVERIFIED'` and `'SIGNEDIN'` is determined by if the current user verified its email That is useful, for example, for routing. You can send users to a pending verifications email or the default signed in page, depending on this status.
+
+There are two ways to access the auth status: subscribing to auth state changes or syncournously reading the most recent state in a property on the AuthMech instance. 
+
+### Subscribing to Auth Changes
+
+You can set any number of observers functions to be called when auth state changes. The current user and the status values will be passed inside a payload object. The example bellow is extracted from the demo app available in the library repository. It shows a adequate html code depeding on the state.
+
+    import { authMech } from './foobar';
 
     const adjusteRoute = ({user, status}) => {
         if (status === 'LOGGEDIN') {
@@ -92,10 +72,10 @@ You can set any number of callbacks to be called when auth state changes. The cu
           // Let's get out to the login form.
         }
       }
-    fireauthMachine.subscribe(adjusteRoute)
+    authMech.subscribe(adjusteRoute)
 
     const dummyCallback = ({status}) => console.log(`auth state changed to ${status}`)
-    fireauthMachine.subscribe(dummyCallback)
+    authMech.subscribe(dummyCallback)
 
 Every call to the `subscribe` method will return an `unsubscribe` function. You can call it to terminate the contract.
 
@@ -123,21 +103,21 @@ Then we can initialize firebase auth service and our state machine:
     import * as firebase from 'firebase/app';
     import 'firebase/auth';
 
-    import { FireauthMachine } from '@joaomelo/fireauth-machine';
+    import { AuthMech } from '@joaomelo/auth-mech';
 
     const fireApp = firebase.initializeApp({
       //you firebase project config = data
     });
 
-    const fireauthMachine = new FireauthMachine(fireApp.auth());
-    export { fireauthMachine };
+    const authMech = new AuthMech(fireApp.auth());
+    export { authMech };
 
-Cool. Now, inside our Vue main component, we can leverage the state machine to show the appropriate UI. To access the current auth state you just need to reference the `status` property of the `fireauthMachine` you created. Like this:
+Cool. Now, inside our Vue main component, we can leverage the state machine to show the appropriate UI. To access the current auth state you just need to reference the `status` property of the `authMech` you created. Like this:
 
     <template>
         <component
           :is="page"
-          :fireauth-machine="fireauthMachine"
+          :auth-mech="authMech"
         />
     </template>
 
@@ -146,12 +126,12 @@ Cool. Now, inside our Vue main component, we can leverage the state machine to s
     import PageLogin from './page-login';
     import PageLoading from './page-solving';
 
-    import { fireauthMachine } from './auth';
+    import { authMech } from './auth';
 
     export default {
       name: 'App',
       data () {
-        return { fireauthMachine };
+        return { authMech };
       },
       computed: {
         page () {
@@ -161,7 +141,7 @@ Cool. Now, inside our Vue main component, we can leverage the state machine to s
             SIGNOUT: PageLogin
           };
 
-          return components[this.fireauthMachine.status];
+          return components[this.authMech.status];
         }
       }
     };
@@ -171,11 +151,11 @@ This way, every time the user state changes, Vue will automatically switch to th
 
 ### Firebase Auth is Still There, Don't Worry!
 
-There is no ambition to create a facade over the firebase auth. The only copied state from fireauth is the user. This make easier to build reactive UI with frameworks like Vue or React. Any other properties or methods you want to use from firebase auth service are reachable by the `service` property in the `fireauthMachine` object. In a dummy home page, for example, we can do the `signOut` from a button. Check it out:
+There is no ambition to create a facade over the firebase auth. The only copied state from fireauth is the user. This make easier to build reactive UI with frameworks like Vue or React. Any other properties or methods you want to use from firebase auth service are reachable by the `service` property in the `authMech` object. In a dummy home page, for example, we can do the `signOut` from a button. Check it out:
 
     <template>
       <div>
-        <p>welcome {{ fireauthMachine.user.email }}</p>
+        <p>welcome {{ authMech.user.email }}</p>
         <button @click.prevent="signOut">
           sign out
         </button>
@@ -186,14 +166,14 @@ There is no ambition to create a facade over the firebase auth. The only copied 
     export default {
       name: 'PageHome',
       props: {
-        fireauthMachine: {
+        authMech: {
           type: Object,
           required: true
         }
       },
       methods: {
         signOut () {
-          this.fireauthMachine.service.signOut();
+          this.authMech.service.signOut();
         }
       }
     };
@@ -201,14 +181,14 @@ There is no ambition to create a facade over the firebase auth. The only copied 
 
 ## Keep the User List in Firestore
 
-The auth service has constraints that make it a non ideal service to handle user preferences. If you choose [Firestore](https://firebase.google.com/docs/firestore) to manage that extra user data, fireauth-machine can give you a hand with that. It make sure users have a corresponding document in the Firestore collection of your choice.
+The auth service has constraints that make it a non ideal service to handle user preferences. If you choose [Firestore](https://firebase.google.com/docs/firestore) to manage that extra user data, auth-mech can give you a hand with that. It make sure users have a corresponding document in the Firestore collection of your choice.
 
-The FireauthMachine constructor accepts a optional second parameter. You can pass a options object with the property `pushTo` with a Firestore collection reference as value. By activating this behavior, every time a user Login the FireauthMachine will check if exists a document on that collection with the same id as the user. If the document isn't found, the FireauthMachine will create it with an `userId` and `email` fields filled. Let's see that in code:
+The AuthMech constructor accepts a optional second parameter. You can pass a options object with the property `pushTo` with a Firestore collection reference as value. By activating this behavior, every time a user Login the AuthMech will check if exists a document on that collection with the same id as the user. If the document isn't found, the AuthMech will create it with an `userId` and `email` fields filled. Let's see that in code:
 
     import * as firebase from 'firebase/app';
     import 'firebase/auth';
     import 'firebase/firestore';
-    import { FireauthMachine } from @joaomelo/fireauth-machine
+    import { AuthMech } from @joaomelo/auth-mech
 
     const fireapp = firebase.initializeApp({
       // config data
@@ -218,18 +198,18 @@ The FireauthMachine constructor accepts a optional second parameter. You can pas
     const db = fireapp.firestore();
     const profiles = db.collection('profiles');
 
-    const fireauthMachine = new FireauthMachine(auth, { pushTo: profiles });
-    export { fireauthMachine };
+    const authMech = new AuthMech(auth, { pushTo: profiles });
+    export { authMech };
 
 ## Wrapping up
 
-So to use the package you import the `FireauthMachine` class and create instantiate an object passing the fireauth reference. Then, you can (1) access the user and user status by the `user` and `status` properties and (2) subscribe to auth state change events passing callbacks to the `subscribe` method. All fireauth functionality is accessible trough the `service` property. Simple as that.
+So to use the package you import the `AuthMech` class and create instantiate an object passing the fireauth reference. Then, you can (1) access the user and user status by the `user` and `status` properties and (2) subscribe to auth state change events passing callbacks to the `subscribe` method. All fireauth functionality is accessible trough the `service` property. Simple as that.
 
 ## Using the Demo
 
 There is a demo app you can play to explore what I said here. Start by cloning the repository.
 
-    git clone https://github.com/joaomelo/fireauth-machine.git
+    git clone https://github.com/joaomelo/auth-mech.git
 
 Create a `demo.env` file inside the `demo/config` folder with the variables assignments bellow. Replace the values with the real ones for your firebase project.
 

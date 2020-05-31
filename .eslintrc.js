@@ -1,18 +1,13 @@
 module.exports = {
-  env: {
-    'jest/globals': true
-  },
   parserOptions: {
     parser: 'babel-eslint'
   },
+  ignorePatterns: ['*/dist/*'],
   rules: {
     semi: ['error', 'always'],
-    'jest/no-test-callback': 'off'
+    'no-debugger': 'off'
   },
   extends: [
-    'standard',
-    'plugin:vue/recommended',
-    'plugin:jest/all'
+    'standard'
   ],
-  plugins: ['vue', 'jest']
 };
