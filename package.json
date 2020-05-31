@@ -4,17 +4,10 @@
   "description": "Complements Firebase auth with opinionated approaches to observation of auth state changes, treat email verification as default and fuse user data from auth with an arbitrary collection in Firestore.",
   "main": "lib/dist/index.js",
   "scripts": {
-    "start": "npm run dev",
-    "dev": "webpack-dev-server --config demo/cfg/webpack.config.js",
+    "start": "webpack-dev-server --config demo/cfg/webpack.config.js",
     "lint": "eslint */src/**/*.js",
     "build": "rimraf lib/dist/* && webpack --config lib/cfg/webpack.config.js",
-    "commit": "git add -A && git commit",
-    "push": "git push && git push --tags",
-    "pack": "npm run lint && npm run build && npm run commit",
-    "bump:patch": "npm run pack && npm version patch && npm run push",
-    "bump:minor": "npm run pack && npm version minor && npm run push",
-    "bump:major": "npm run pack && npm version major && npm run push",
-    "deploy": "npm run build && npm publish --access public"
+    "deploy": "npm run lint && npm run build && npm publish --access public"
   },
   "repository": {
     "type": "git",
