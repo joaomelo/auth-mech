@@ -38,6 +38,13 @@ el('updatePassword').onclick = () => authMech
   .updatePassword(val('newPassword'), val('password'))
   .then(result => addMsg(result.message));
 
+el('set').onclick = () => authMech
+  .updateProps({
+    preference: val('preference'),
+    option: val('option')
+  });
+// .then(result => addMsg(result.message));
+
 // routing
 function renderLoading () {
   displayEls('.auth', 'none');
@@ -60,12 +67,11 @@ function renderUnverified () {
 }
 
 function renderSignedIn () {
+  const email = authMech.state.userData.email;
   displayEls('.auth', 'none');
   displayEls('input', 'block');
-  displayEls('#updateEmail', 'inline-block');
-  displayEls('#updatePassword', 'inline-block');
-  displayEls('#signOut', 'inline-block');
-  addMsg(`cool you are in ${authMech.state.userData.email}`);
+  displayEls(['#updateEmail', '#updatePassword', '#signOut', '#set'], 'inline-block');
+  addMsg(`signed in as ${email}`);
 }
 
 // helpers

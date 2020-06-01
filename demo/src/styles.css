@@ -5,34 +5,39 @@
 
 main {
   min-width: 350px;
-  max-width: 500px;
-  margin: 20px auto 0px;
+  margin: 20px auto;
   border-style: dotted;
   border-width: 1px;
   padding: 5px;
 }
 
-input {
-  display: block;
-  margin: 10px auto 0px;
+.content, .actions {
   width: 90%;
+  margin: 0 auto;
 }
 
 .actions {
   display: flex;
   justify-content: center;
-  margin-top: 10px;
 }
 
-button {
-  margin: 10px 2px 0px;
+main > *, .content > *, .actions > * {
+  margin: 10px auto;
+}
+
+h1 {
+  text-align: center;
+  font-size: x-large;
+}
+
+input {
+  display: block;
+  width: 100%;
 }
 
 .msg {
   background-color: lightgray;
-  margin: 10px auto 10px;
   padding: 5px;
-  width: 90%;
 }
 
 .msg > p {

@@ -11,29 +11,32 @@
   <div class="container">
     <main>
       <form>
-        <input
-          id="email"
-          type="email"
-          placeholder="type email..."
-          class="auth"
-        >
-        <input
-          id="newPassword"
-          type="password"
-          placeholder="type new password..."
-          class="auth"
-        >
-        <input
-          id="password"
-          type="password"
-          placeholder="type password..."
-          class="auth"
-        >
+        <h1>login</h1>
+        <div class="content">
+          <input
+            id="email"
+            type="email"
+            placeholder="type email..."
+            class="auth control"
+          >
+          <input
+            id="newPassword"
+            type="password"
+            placeholder="type new password..."
+            class="auth control"
+          >
+          <input
+            id="password"
+            type="password"
+            placeholder="type password..."
+            class="auth control"
+          >
+        </div>
         <div class="actions">
           <button 
             id="signUp"
             type="button"
-            class="auth"
+            class="auth control"
           >
             Sign Up
           </button>
@@ -74,7 +77,36 @@
           </button>      
         </div>
       </form>
-      <div id="msg" class="msg"></div>
+      <form>
+        <h1>preferences</h1>
+        <div class="content">
+          <input
+            id="preference"
+            type="text"
+            placeholder="type an arbitrary preference..."
+            class="auth"
+          >
+          <input
+            id="option"
+            type="text"
+            placeholder="type come string option..."
+            class="auth"
+          >
+        </div>
+        <div class="actions">
+          <button 
+            id="set"
+            type="button"
+            class="auth"
+          >
+            Set Properties
+          </button>
+        </div>
+      </form>
+      <div>
+        <h1>messages</h1>
+        <div id="msg" class="msg content"></div>
+      </div>
     </main>  
   </div>
 </body>
