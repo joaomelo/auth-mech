@@ -24,7 +24,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cat ./package.json
 
-  build:
+  test:
     needs: bump
     runs-on: ubuntu-latest
     steps:
@@ -35,8 +35,8 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
-  publish-npm:
-    needs: build
+  publish:
+    needs: [bump, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
