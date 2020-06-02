@@ -15,9 +15,6 @@ const fireapp = firebase.initializeApp({
 });
 
 const auth = fireapp.auth();
-// const db = fireapp.firestore();
-// const profiles = db.collection('profiles');
-
 const authMech = new AuthMech({
   service: auth,
   fuse: 'profiles'

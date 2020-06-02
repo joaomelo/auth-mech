@@ -9,6 +9,8 @@ authMech.subscribe(payload => {
     SIGNEDIN: renderSignedIn
   };
 
+  console.log(payload);
+
   const render = renderFunctions[payload.status];
   render();
 });
