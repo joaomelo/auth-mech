@@ -151,7 +151,7 @@ const addMsg = str => { el('msg').innerText = str; } ;
 // set buttons to take advantage if AuthMech methods
 // and log the operations resulting messages 
 el('signUp').onclick = () => authMech
-  .signUp(val('email'), val('password'))
+  .signUp(getVal('email'), getVal('password'))
   .then(result => addMsg(result.message));
 
 el('resendEmail').onclick = () => authMech
@@ -159,7 +159,7 @@ el('resendEmail').onclick = () => authMech
   .then(result => addMsg(result.message));
 
 el('signIn').onclick = () => authMech
-  .signIn(val('email'), val('password'))
+  .signIn(getVal('email'), getVal('password'))
   .then(result => addMsg(result.message));
 
 el('signOut').onclick = () => authMech
@@ -188,11 +188,11 @@ const val = id => el(id).value;
 const addMsg = str => { el('msg').innerText = str; } ;
 
 el('updateEmail').onclick = () => authMech
-  .updateEmail(val('email'), val('password'))
+  .updateEmail(getVal('email'), getVal('password'))
   .then(result => addMsg(result.message));
 
 el('updatePassword').onclick = () => authMech
-  .updatePassword(val('newPassword'), val('password'))
+  .updatePassword(getVal('newPassword'), getVal('password'))
   .then(result => addMsg(result.message));
 ```
 
