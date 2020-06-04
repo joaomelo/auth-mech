@@ -2,6 +2,8 @@ import './styles.css';
 import { authMech } from './auth';
 
 authMech.subscribe(payload => {
+  console.log(payload);
+
   const renderFunctions = {
     UNSOLVED: renderLoading,
     SIGNEDOUT: renderLogin,
