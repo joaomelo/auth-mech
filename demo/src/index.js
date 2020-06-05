@@ -43,7 +43,7 @@ el('updatePassword').onclick = () => authMech
   .catch(error => addMsg(error.message));
 
 el('set').onclick = () => authMech
-  .updateFuse({
+  .updateProps({
     preference: getVal('preference'),
     option: getVal('option')
   })

@@ -1,36 +1,34 @@
 # Auth-mech
 
-Complements Firebase auth with opinionated approaches to observation of auth state changes, treat email verification as default and fuse user data from auth with an arbitrary collection in Firestore.
+Complements Firebase auth with opinionated approaches to state change observation, treat email verification as default, and fuse user data from the auth engine and an arbitrary Firestore collection.
 
-## Motivation
+# Motivation
 
-[Firebase](https://firebase.google.com/) is awesome. It makes easier for solo developers and small teams to build software with agility. One of its main conveniences is the authentication module. You can check everything about it [here](https://firebase.google.com/docs/auth).
+[Firebase](https://firebase.google.com/) gives agility to solo developers and small teams. One of its main conveniences is the [authentication module](https://firebase.google.com/docs/auth).
 
-After a few times building login UI with Firebase auth, I found myself repeating code to wrap or complement Firebase auth features. I decided to write this library to improve reusability and reduce bugs mainly to these use cases:
+After a few times building login UI with Firebase auth, I found myself repeating code to wrap or complement its features. I decided to write this library to improve reusability and reduce bugs surrounding the following use cases.
 
-### General Observability of Authentication State.
+## Fuse Data with Firestore
 
-Firebase auth offers a `onAuthStateChanged` method to observe state changes. But if you need to check on those from many points in app code you will need to implement some sort of central event architecture. You will need to create logic to transform the parameters values from onAuthStateChanged into status values. Is to given, for example, if the user is logged off or the auth engine didn't resolve the user yet.   
+Firebase auth holds some user properties but is not the best of places to expand [storage of user preferences](https://firebase.google.com/docs/auth/users#user_properties). A nice alternative is to use a Firestore collection, but now you have to sync two datasets. Auth-mech abstracts a data fusion between the auth engine and a given Firestore collection. 
 
-### Opinionated Security Measures
+## Observability of Authentication State.
 
-Although not enforced by Firebase, i find important to avoid abusing behavior from malicious users to aks for email verification on sign up and email changes. Auth-mech also demands re-authentication at every email and password changes.
+Firebase auth offers an `onAuthStateChanged` method to observe state changes. But if you need to check on that from many points, soon you will need to implement some event architecture to deal with subscriptions and transform context into actual status values. Auth-mech provides a `subscribe` method that will notify observers with updated status and user data. 
 
-### Auto Link to a Firestore collection
+## Opinionated Security Measures
 
-*THIS FEATURE IS STILL IN DEVELOPMENT, DO NOT CONSIDER IT YET AS REASON TO USE THE LIBRARY.*
-
-Firebase auth is not the best of places to store user like preferences or profile. To do that you will need to create a collection in Firestore. Auth-mech takes the heavy lifting abstracting a fusion between the auth engine and the given collection. 
+Although not enforced by Firebase, Auth-mech always asks for email verification on sign up and email updates. The library also demands re-authentication at every email and password change.
 
 But code is the more eloquent way to explain all this. Let me show how to get started.
 
-## Getting Started
+# Getting Started
 
 Install with npm.
 
     npm install @joaomelo/auth-mech
 
-First, initialize firebase as usual then add an additional step to create an auth-mech instance. The AuthMech's constructor takes as only parameter a config object. The service property of that object is the place to pass the reference to the Firebase auth object. See:
+First, initialize firebase as usual then add an additional step to create an `AuthMech` instance. The `AuthMech` class constructor takes an options object as the only parameter. The service property of that object is the place to pass the reference to Firebase auth. Take a look:
 
 ``` js
 import * as firebase from 'firebase/app';
@@ -47,19 +45,29 @@ authMech = new AuthMech({
 export { authMech }
 ```
 
-Now you are good to go about using auth-mech features 😏.
+Now you are good to go about using Auth-mech features 😏.
 
-## Reading Auth State
+# Reading Auth State
 
-Auth-mech abstracts four auth states: `'UNSOLVED'`, `'SIGNEDOUT'`, `'UNVERIFIED'`, `'SIGNEDIN'`. 
+Auth-mech considers authentication state the combination of current user data and auth status. 
 
-The first one is the default initial state. It will hold until Firebase auth resolves the login status. `'UNSOLVED'` is useful to control a start loading screen, for example. The others states are determined by the most recent user object provided by Firebase auth. 
+## Status
 
-While `'SIGNEDOUT'` value is quite obvious, the choice between `'UNVERIFIED'` and `'SIGNEDIN'` is determined by if the current user verified its email. That is useful, for example, for routing. You can send users to a pending verifications email screen or the default signed in page.
+The four recognized statuses are: `'UNSOLVED'`, `'SIGNEDOUT'`, `'UNVERIFIED'`, `'SIGNEDIN'`. 
 
-There are two ways to access the auth status: subscribing to auth state changes or synchronously reading the most recent state in a property on the AuthMech instance. 
+The default initial status is `'UNSOLVED'`. It will hold until Firebase auth resolves the login status.  It is useful to control a start loading screen, for example.
 
-### Subscribing to Auth Changes
+While `'SIGNEDOUT'` status is obvious, the choice between `'UNVERIFIED'` and `'SIGNEDIN'` signals if the current user has verified its email. That is useful for routing, for example. You choose to send users to a pending verifications email screen or the default signed in page.
+
+## User Data
+
+To access user information, Auth-mech provides the `userData` object with user properties found in the standard Firebase auth [user](https://firebase.google.com/docs/reference/js/firebase.User#properties). Auth-mech adds an `emailLocalPart` property with the string that comes before the "@" char in emails. 
+
+It can also fuse fields from a document in Firestore but we will talk about how setup that in another section. Keep in mind that the `userData` is a simple object without any methods.
+
+So, we have two ways to read status and user data: subscribing to auth state changes or synchronously reaching for properties on the AuthMech instance.
+
+## Subscribing to State Changes
 
 To listen to auth state changes, you pass a observer function to the `subscribe` method in the AuthMech instance. The current user data and status values will be passed inside a payload object to the observer functions every time auth state changes. 
 
@@ -94,13 +102,13 @@ authMech.subscribe(payload => {
 
 The `subscribe` method returns an `unsubscribe` function. You can call it to terminate the contract.
 
-### An Auth State Store
+## An Auth State Store
 
-For some reason you might not want to read data from a asynchronous event driven approach like youwe did with the subscribe `method`.
+For some reason you might not want to read data from a asynchronous event driven approach like we did with the subscribe `method`.
 
-Maybe you just need the last user data to show a message or if you are building reactive UIs you want to proxy setter and getters like the Vue framework does.
+Maybe you just need the last user data to show a message or you are building reactive UIs like the ones in Vue and React frameworks.
 
-For those cases the AuthMech instance has a `state` property that works like a data store. Inside that property you will always find an `userData` and `status` sub-properties updated with the latest auth state.
+For those cases the AuthMech instance has a `state` property object that works like a data store. Inside that object you will always find an `userData` and `status` properties updated with the latest auth state.
 
 Building upon the last section example, a function to render a simple unverified user email screen could be like that. 
 
@@ -124,21 +132,19 @@ function renderUnverified () {
 }
 ```
 
-The `userData` object will hold what the standard Firebase auth [user](https://firebase.google.com/docs/reference/js/firebase.User#properties) would, plus a `emailLocalPart` property with the string email part before the "@" char. The userData is a simple data object without any methods.
+Auth-mech also provides features to manipulate the state.
 
 # Auth Operations
 
-Auth-mech build a few auth operations on top of Firebase auth. Nothing fancy, but anyhow reduce repetition between apps. 
+Auth-mech build a few auth operations on top of Firebase auth. Nothing fancy, but still aiming to reduce code repetition between apps. 
 
 ## Sign Methods with Email Verification
 
-The first ones provided in `signUp` and `signIn` methods. They take email and password strings as parameters and return a Promise that will resolve in a object with a message property and a `isSuccess` property if no error happened.
+AuthMech provides the standard `signUp`, `signIn` and `signOut` methods. The last two will just call the corresponding method on Firebase auth. Signup will add the step of sending an verification email after creating the user.
 
-SignUp will by default send a email verification. Until the user confirms his email, the auth state will be set to `'UNVERIFIED'` after successful `signIn`.
+So, like the official methods, Signup and signin take the email and password as parameters and return a Promise that will resolve or reject with a error depending on the operation success.
 
-If you ever need to send that email again, just call the `sendEmailVerification` method. It too will return a Promise that will resolve in a object with a message property.
-
-`AuthMech` instances also exposes a signOut method that will do exactly what Firebase auth does: sign out the user and return a Promise.
+Regarding the email verification, until the user confirms his email the auth status will be set to `'UNVERIFIED'`. If you ever need to send that email again, just call the `sendEmailVerification` AuthMech method. It too will return a Promise that will resolve or reject.
 
 If we had a page with buttons for those operations we could set their click behavior to something like this.
 
@@ -152,83 +158,110 @@ const addMsg = str => { el('msg').innerText = str; } ;
 // and log the operations resulting messages 
 el('signUp').onclick = () => authMech
   .signUp(getVal('email'), getVal('password'))
-  .then(result => addMsg(result.message));
+  .then(() => addMsg('verification email sent'))
+  .catch(error => addMsg(error.message));
 
 el('resendEmail').onclick = () => authMech
   .sendEmailVerification()
-  .then(result => addMsg(result.message));
+  .then(() => addMsg('email sent'));
 
 el('signIn').onclick = () => authMech
   .signIn(getVal('email'), getVal('password'))
-  .then(result => addMsg(result.message));
+  .then(() => addMsg('signed in'))
+  .catch(error => addMsg(error.message));
 
 el('signOut').onclick = () => authMech
   .signOut()
   .then(() => addMsg('user signed out'));
 ```
 
-## Updating Email Credentials
+## Updating Credentials
 
-Firebase Auth supports updating email and password without providing user password. It maybe demands re-authentication based on the last time the user signed in.
-
-I find that behavior a little unpredictable and also think that users should also confirm password when doing those updates.
+Firebase Auth supports updating email and password without providing user password. It maybe demands re-authentication based on the last time the user signed in. I find that behavior a little unpredictable and also believe that users should always confirm password when doing those updates.
 
 AuthMech instances provide `updateEmail` and `updatePassword` methods. They take the new email or password string as first parameter and the current password as second.
 
-They will always attempt a re-authentication before updating and return a Promise resolving in that typical object with a message property and eventually a isSuccess property if everything went alright.
+They will always attempt a re-authentication before updating and return a Promise which resolves or rejects based on Firebase response.
 
-updateEmail will also take advantage of Firebase User `verifyBeforeUpdateEmail` method. That is, the email will just really change after the user confirms an email message sent to her.
+The email will not update until the user confirms the link sent to him or her. But `updatePassword`, otherwise, will update immediately and trigger a AuthMech state change.
 
-As in our last example let's exercise how this methods could be implemented.
+Let's see a example implemented for those updates.
 
 ``` js
 // helper functions
 const el = id => document.getElementById(id);
-const val = id => el(id).value;
+const getVal = id => el(id).value;
 const addMsg = str => { el('msg').innerText = str; } ;
 
 el('updateEmail').onclick = () => authMech
   .updateEmail(getVal('email'), getVal('password'))
-  .then(result => addMsg(result.message));
+  .then(() => addMsg('verification email sent'));
 
 el('updatePassword').onclick = () => authMech
   .updatePassword(getVal('newPassword'), getVal('password'))
-  .then(result => addMsg(result.message));
+  .then(() => addMsg('email sent'));
 ```
 
-## Keep More User Data in Firestore
-*THIS FEATURE IS STILL IN DEVELOPMENT, DO NOT USE IT YET.*
+# Extend User Data Using Firestore
 
-The auth service has constraints that make it a non ideal service to handle user preferences. If you choose [Firestore](https://firebase.google.com/docs/firestore) to manage that extra user data, auth-mech can give you a hand with that. It make sure users have a corresponding document in the Firestore collection of your choice.
+The auth service has constraints that make it a non ideal service to handle user preferences. If you choose [Firestore](https://firebase.google.com/docs/firestore) to manage that extra user data, Auth-mech can give you a hand with that. 
 
-The AuthMech constructor accepts a optional second parameter. You can pass a options object with the property `pushTo` with a Firestore collection reference as value. By activating this behavior, every time a user Login the AuthMech will check if exists a document on that collection with the same id as the user. If the document isn't found, the AuthMech will create it with an `userId` and `email` fields filled. Let's see that in code:
+The options object passed to the AuthMech constructor accepts a fuse property. The value must be a string corresponding to the Firestore collection you want to save user data. By activating this behavior AuthMech will create a document for every new user to hold any extra data we want associated to users like preferences or profile. 
 
-    import * as firebase from 'firebase/app';
-    import 'firebase/auth';
-    import 'firebase/firestore';
-    import { AuthMech } from @joaomelo/auth-mech
+## Reading Fused Properties
 
-    const fireapp = firebase.initializeApp({
-      // config data
-    });
+The `userData` object passed to observer functions and also available in the state property of every AuthMech instance will fuse data both from the user in the Firebase auth and from that Firestore document. We could write a function to render user extended data after Sign In.
 
-    const auth = fireapp.auth();
-    const db = fireapp.firestore();
-    const profiles = db.collection('profiles');
+``` js
+const el = id => return document.getElementById(id);
+const setVal = (id, value) => { el(id).value = value };
 
-    const authMech = new AuthMech(auth, { pushTo: profiles });
-    export { authMech };
+function renderSignedIn () {
+  const data = authMech.state.userData;
+  data.preference && setVal('preference', data.preference);
+  data.option && setVal('option', data.option);
+
+  addMsg(`signed in as ${data.email}`);
+}
+```
+
+When we need to update those extra properties, we call the `updateProps` method on `AuthMech` instances. The method accepts a object as parameters. The data will be merged to the Firestore document and AuthMech will trigger a state change.
+
+If we wanted to update the same properties of the last example. We could something like this.
+
+``` js
+el('setButton').onclick = () => authMech
+  .updateProps({
+    preference: getVal('preference'),
+    option: getVal('option')
+  })
+  .then(() => addMsg('props updated'))
+  .catch(error => addMsg(error.message));
+```
+
+We are almost done now.
 
 # Firebase is Still There
 
-Firebase auth is a powerful library and is reaseonable to asume that you will need to use it even if installing auth-mech library. 
-
-You can always export tha auth instance from wheteaver module you are initializing Firebase or, for conviniece sake access it from the AuthMech instance. If it is the case, it kept inside the `options` property, like so:
+Firebase auth is a powerful library and is reasonable to assume that you will find need to use it even if installing auth-mech library. In that case, you can always export tha auth instance from whatever module you are initializing Firebase or, for convenience sake, access it directly from the AuthMech instance. It is kept inside the `config` object in the `service` property, like so:
 
 ``` js
-const fireauth = authMech.options.service;
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
+import { AuthMech } from '@joaomelo/auth-mech';
 
-// here do advance stuff with fireauth methods 
+const fireApp = firebase.initializeApp({
+  // config data
+});
+
+authMech = new AuthMech({
+  service: fireApp.auth()
+});
+
+const hereWeHaveFireAuth = fireApp.auth();
+const hereTheSameFireauthAgain = authMech.config.service;
+
+// do advance stuff with the Firebase auth of your preference
 // ...
 ```
 
