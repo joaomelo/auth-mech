@@ -212,6 +212,22 @@ The auth service is a nonideal service to handle user preferences. If you choose
 
 The options object passed to the AuthMech constructor accepts a `fuse` property. The value must be a string corresponding to the Firestore collection you want to save user data. By activating this behavior, AuthMech will create a document for every new user to hold any extra data we want to be associated with users like preferences or profile information. 
 
+``` js
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
+import { AuthMech } from '@joaomelo/auth-mech';
+
+const fireApp = firebase.initializeApp({
+  // config data
+});
+
+const authMech = new AuthMech({
+  service: fireApp.auth(),
+  fuse: 'profiles'
+});
+export { authMech }
+```
+
 ## Reading Fused Properties
 
 The `userData` object passed to observer functions and also available in the state property of every AuthMech instance will fuse data both from the user in the Fireauth and from that Firestore document. We could write a function to render extended user data after Sign In.
