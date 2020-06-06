@@ -39,7 +39,7 @@ const fireApp = firebase.initializeApp({
   // config data
 });
 
-authMech = new AuthMech({
+const authMech = new AuthMech({
   service: fireApp.auth()
 });
 export { authMech }
