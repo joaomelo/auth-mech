@@ -259,6 +259,23 @@ el('setButton').onclick = () => authMech
   .catch(error => addMsg(error.message));
 ```
 
+## Keep an Eye on Security
+
+Take notice that Firestore collection will be subject to that service features. This means that the Security Rules setup will be essential to allow Auth-mech to read an update when the fuse option is activated and also to protect your app data. For reference, one approach regarding a fictitious `profile` collection could be:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /profiles/{profile} {
+      allow delete: if false;
+      allow read, update: if request.auth.uid == resource.id;
+      allow create: if request.auth.uid == request.resource.id;
+    }
+  }
+}
+```
+
 We are almost done now.
 
 # Firebase is Still There
