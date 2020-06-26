@@ -1,6 +1,6 @@
 {
   "name": "@joaomelo/auth-mech",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "description": "Complements Firebase Authentication service with opinionated approaches to state change observation, treat email verification as default, and fuse user data from the auth engine and an arbitrary Firestore collection.",
   "main": "lib/dist/index.js",
   "scripts": {
