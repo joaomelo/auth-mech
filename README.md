@@ -63,8 +63,6 @@ While `'SIGNEDOUT'` status meaning is evident, the choice between `'UNVERIFIED'`
 
 To access user information, Auth-mech provides the `userData` object with properties found in the standard Fireauth [user](https://firebase.google.com/docs/reference/js/firebase.User#properties). 
 
-Auth-mech adds an `emailLocalPart` property with the string that comes before the "@" char in emails. It can also fuse fields from a document in Firestore, but we will talk about that in another section. 
-
 Keep in mind that `userData` is a simple object without any methods.
 
 Therefore, we have two ways to read status and user data: subscribing to auth state changes or synchronously reaching for properties on the AuthMech instance.
@@ -208,9 +206,9 @@ el('updatePassword').onclick = () => authMech
 
 # Extend User Data Using Firestore
 
-The auth service is a nonideal service to handle user preferences. If you choose [Firestore](https://firebase.google.com/docs/firestore) to manage that extra user data, Auth-mech can give you a hand with that. 
+The auth service is a unideal service to handle user preferences. If you choose [Firestore](https://firebase.google.com/docs/firestore) to manage that extra user data, Auth-mech can give you a hand with that. 
 
-The options object passed to the AuthMech constructor accepts a `fuse` property. The value must be a string corresponding to the Firestore collection you want to save user data. By activating this behavior, AuthMech will create a document for every new user to hold any extra data we want to be associated with users like preferences or profile information. 
+The options object passed to the AuthMech constructor accepts a `fuse` property. The value must be an object with a at least the `name` property inside of it. This `name` property must have a string value corresponding to the Firestore collection name you want to save extended user data. By activating this behavior, AuthMech will create a document for every new user to hold any extra data we want to be associated with users like preferences or profile information. 
 
 ``` js
 import * as firebase from 'firebase/app';
@@ -223,7 +221,36 @@ const fireApp = firebase.initializeApp({
 
 const authMech = new AuthMech({
   service: fireApp.auth(),
-  fuse: 'profiles'
+  fuse: { 
+    name: 'profiles'
+  }
+});
+export { authMech }
+```
+
+You can set some default values in that collection, like username or organization based on the user email. To do that, you provide a function to an `onCreate` property inside the `fuse` object. That function receives the user as parameter and must return an object. The key-values of that returning object will be set to the fused document. Here an example:  
+
+``` js
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
+import { AuthMech } from '@joaomelo/auth-mech';
+
+const fireApp = firebase.initializeApp({
+  // config data
+});
+
+const authMech = new AuthMech({
+  service: fireApp.auth(),
+  fuse: { 
+    name: 'profiles',
+    onCreate: user => { 
+      const pos = user.email.indexOf('@');
+      const localPart = user.email.slice(0, pos);
+      return {
+        localPart
+      };
+    }
+  }
 });
 export { authMech }
 ```
@@ -261,15 +288,15 @@ el('setButton').onclick = () => authMech
 
 ## Keep an Eye on Security
 
-Take notice that Firestore collection will be subject to that service features. This means that the Security Rules setup will be essential to allow Auth-mech to read an update when the fuse option is activated and also to protect your app data. For reference, one approach regarding a fictitious `profile` collection could be:
+Take notice that Firestore collection we chose to fuse will be subject to the service features. This means that the [Security Rules](https://firebase.google.com/docs/firestore/security/get-started) setup will be essential to allow Auth-mech to read an update when the fuse option is activated and also to protect your app data. For reference, one approach regarding the `profiles` collection mentioned on the last examples could be:
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /profiles/{profile} {
+    match /profiles/{profileId} {
       allow delete: if false;
-      allow read, update: if request.auth.uid == resource.id;
+      allow read, update: if request.auth.uid == profileId;
       allow create: if request.auth.uid == request.resource.id;
     }
   }

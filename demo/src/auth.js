@@ -17,7 +17,16 @@ const fireapp = firebase.initializeApp({
 const auth = fireapp.auth();
 const authMech = new AuthMech({
   service: auth,
-  fuse: 'profiles'
+  fuse: {
+    name: 'profiles',
+    onCreate: user => {
+      const pos = user.email.indexOf('@');
+      const localPart = user.email.slice(0, pos);
+      return {
+        localPart
+      };
+    }
+  }
 });
 
 export { authMech };
