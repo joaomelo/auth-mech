@@ -55,7 +55,7 @@ Auth-mech considers authentication state the combination of current user data an
 
 The four recognized statuses are: `'UNSOLVED'`, `'SIGNEDOUT'`, `'UNVERIFIED'`, `'SIGNEDIN'`. 
 
-The initial status is `'UNSOLVED'`. It will hold until Fireauth resolves the first login verification.  It is useful to control a start loading screen, for example.
+The initial status is `'UNSOLVED'`. It will hold until Fireauth concludes its first login verification. This status is useful to control a start loading screen, for example.
 
 While `'SIGNEDOUT'` status meaning is evident, the choice between `'UNVERIFIED'` and `'SIGNEDIN'` signals if the current user has verified its email. That is useful for routing, for example. You can choose to send users to a pending email verification screen or the default signed in page.
 
@@ -71,7 +71,7 @@ Therefore, we have two ways to read status and user data: subscribing to auth st
 
 To listen to auth state changes, you pass an observer function to the `subscribe` method in the AuthMech instance. The current user data and status will be given inside a payload object to all observer functions every time auth state changes. 
 
-The example below is adapted from the demo app available in the library (repository)[https://github.com/joaomelo/auth-mech]. It renders adequate Html depending on the state.
+The example below is adapted from the demo app available in the library [repository](https://github.com/joaomelo/auth-mech). It renders adequate Html depending on the state.
 
 ``` js
 import * as firebase from 'firebase/app';
@@ -100,7 +100,7 @@ authMech.subscribe(payload => {
 });
 ```
 
-The `subscribe` method returns an `unsubscribe` function. We can call it to terminate the contract.
+Two side notes. First, the payload object passed to observer function will also contain `oldStatus` and `oldUserData` properties. Second, the `subscribe` method returns an `unsubscribe` function. We can call it to terminate the contract.
 
 ## An Auth State Store
 
