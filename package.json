@@ -1,10 +1,11 @@
 {
   "name": "@joaomelo/auth-mech",
   "version": "0.2.0",
-  "description": "Complements Firebase Authentication service with opinionated approaches to state change observation, treat email verification as default, and fuse user data from the auth engine and an arbitrary Firestore collection.",
+  "description": "An abstraction layer for authentication in JavaScript web apps.",
   "main": "lib/dist/index.js",
   "scripts": {
-    "start": "webpack-dev-server --config demo/cfg/webpack.config.js",
+    "start": "npm run demo",
+    "demo": "nodemon demo/src/index.js",
     "lint": "eslint */src/**/*.js",
     "build": "rimraf lib/dist/* && webpack --config lib/cfg/webpack.config.js",
     "deploy": "npm run build && npm publish --access public"
@@ -44,6 +45,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "firebase": "^7.14.6",
     "html-webpack-plugin": "^4.3.0",
+    "nodemon": "^2.0.4",
     "rimraf": "^3.0.2",
     "style-loader": "^1.2.1",
     "webpack": "^4.43.0",
@@ -51,6 +53,8 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "@joaomelo/bus": "^1.1.4"
+    "@joaomelo/bus": "^1.1.4",
+    "express": "^4.17.1",
+    "pug": "^3.0.0"
   }
 }

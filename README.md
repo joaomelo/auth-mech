@@ -1,8 +1,14 @@
 # Auth-mech
 
-Complements Firebase Authentication service with opinionated approaches to state change observation, treat email verification as default, and fuse user data from the auth engine and an arbitrary Firestore collection.
+An abstraction layer for authentication in JavaScript web apps.
 
 # Motivation
+
+- generalization to switch services
+- hooks to integrate auth to better and business logic
+
+
+Complements Firebase Authentication service with opinionated approaches to state change observation, treat email verification as default, and fuse user data from the auth engine and an arbitrary Firestore collection.
 
 [Firebase](https://firebase.google.com/) gives agility to solo developers and small teams. One of its main conveniences is the [authentication service](https://firebase.google.com/docs/auth).
 
@@ -46,6 +52,11 @@ export { authMech }
 ```
 
 Now you are good to go about using Auth-mech features 😏.
+
+# Authentication Ops
+
+Signin, Signup, Signout
+
 
 # Reading Auth State
 
@@ -329,9 +340,23 @@ const hereTheSameFireauthAgain = authMech.config.service;
 // ...
 ```
 
-# Using the Demo
+# The Demo App
 
-There is a demo app you can play to explore what I said here. Start by cloning the repository.
+## What It Is
+
+There is a demo app you can play to explore what I said here. 
+
+The demo is a node server app. It render apps views and expose rest endpoints to the auth operations. It has a protected route that only singed in users can access. The routes are:
+
+Route | Feature
+----- | -------
+`/` | App description with a link the login view and another the protected view
+`/auth` | Sign up and Login view
+`/protected` | Protected view only available to logged users
+
+## How to Run the Demo
+
+Start by cloning the repository.
 
     git clone https://github.com/joaomelo/auth-mech.git
 

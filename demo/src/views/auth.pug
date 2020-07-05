@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  - const isSignup = type==='signup'
+  - const titlePrefix = isSignup ? 'Sign Up' : 'Sign In'
+  - const titlePosfix = service.charAt(0).toUpperCase() + service.slice(1)
+  - const title = `${titlePrefix} to ${titlePosfix}`
+  h1= title
+  main.mtl
+    form
+      input(
+        id='email'
+        type='email'
+        placeholder='type email...'
+      )
+      input(
+        id='password'
+        type='password'
+        placeholder='type password...'
+      )
+      button(
+        id='auth-submit'
+        type='submit'
+      )= title

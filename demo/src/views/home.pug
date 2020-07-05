@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  - 
+    const sections = { firebase: {}, auth0: {}, rest: {} };
+    Object.keys(sections).forEach(s => {
+      sections[s].title = s.charAt(0).toUpperCase() + s.slice(1);
+      sections[s].singup = `/auth/?type=signup&service=${s}`
+      sections[s].singin = `/auth/?type=signin&service=${s}`
+    })
+
+  h1 Home Page
+  main.mtl
+    section.nc 
+      a.link(href="/restrict") go to restricted page
+      a.link(href="#") sign out from j@melo.plus
+    each val in sections
+      section.nc
+        h2= val.title
+        a.link(href=val.singup) sign up
+        a.link(href=val.singin) sign in
