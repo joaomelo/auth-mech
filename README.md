@@ -22,6 +22,10 @@ Although not enforced by Firebase, Auth-mech always asks for email verification 
 
 But code is the more eloquent way to explain all this. Let me show how to get started.
 
+## Mocking Alternative
+
+It is a mocking alternative to emulate minimal behavior from auth.
+
 # Getting Started
 
 Install with npm.
@@ -53,11 +57,11 @@ Auth-mech considers authentication state the combination of current user data an
 
 ## Status
 
-The four recognized statuses are: `'UNSOLVED'`, `'SIGNEDOUT'`, `'UNVERIFIED'`, `'SIGNEDIN'`. 
+The four recognized statuses are: `'UNSOLVED'`, `'SIGNEDOUT'`, `'PENDING'`, `'SIGNEDIN'`. 
 
 The initial status is `'UNSOLVED'`. It will hold until Fireauth concludes its first login verification. This status is useful to control a start loading screen, for example.
 
-While `'SIGNEDOUT'` status meaning is evident, the choice between `'UNVERIFIED'` and `'SIGNEDIN'` signals if the current user has verified its email. That is useful for routing, for example. You can choose to send users to a pending email verification screen or the default signed in page.
+While `'SIGNEDOUT'` status meaning is evident, the choice between `'PENDING'` and `'SIGNEDIN'` signals if the current user has verified its email. That is useful for routing, for example. You can choose to send users to a pending email verification screen or the default signed in page.
 
 ## User Data
 
@@ -91,7 +95,7 @@ authMech.subscribe(payload => {
   const renderFunctions = {
     UNSOLVED: renderLoading,
     SIGNEDOUT: renderLogin,
-    UNVERIFIED: renderUnverified,
+    PENDING: renderPENDING,
     SIGNEDIN: renderSignedIn
   };
 
@@ -110,7 +114,7 @@ Maybe you just need the last user data to show a message, or you are building re
 
 In that case, AuthMech instances have a `state` property object that works like a data store. Inside that object, you will find `userData` and `status` properties updated with the latest auth state.
 
-Using the state object, we could write a function to render a simple unverified email screen. 
+Using the state object, we could write a function to render a simple PENDING email screen. 
 
 ``` js
 // initialization code
@@ -118,9 +122,9 @@ const authMech = new AuthMech({
   service: fireapp.auth() 
 });
 // ...
-// after 'UNVERIFIED' state is determined 
+// after 'PENDING' state is determined 
 // this function could be called
-function renderUnverified () {
+function renderPENDING () {
   const email = authMech.state.userData.email;
   const el = document.getElementById('container')
   el.innerHTML = `
@@ -144,7 +148,7 @@ AuthMech provides the standard `signUp`, `signIn` and `signOut` methods. The las
 
 Signup and sign methods take email and password as parameters and return a Promise that will resolve or reject with an error depending on the operation success.
 
-Regarding the email verification, until the user confirms her email, the auth status will be set to `'UNVERIFIED'`. If you ever need to send that email again, just call the `sendEmailVerification` method. It, too, will return a Promise that resolves or rejects depending on Firebase server's response.
+Regarding the email verification, until the user confirms her email, the auth status will be set to `'PENDING'`. If you ever need to send that email again, just call the `sendEmailVerification` method. It, too, will return a Promise that resolves or rejects depending on Firebase server's response.
 
 If we had a page with buttons for these three operations, we could set their click behavior to something like this.
 

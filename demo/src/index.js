@@ -5,7 +5,7 @@ authMech.subscribe(payload => {
   const renderFunctions = {
     UNSOLVED: renderLoading,
     SIGNEDOUT: renderLogin,
-    UNVERIFIED: renderUnverified,
+    PENDING: renderPENDING,
     SIGNEDIN: renderSignedIn
   };
 
@@ -63,7 +63,7 @@ function renderLogin () {
   addMsg('please sign up or sign in');
 }
 
-function renderUnverified () {
+function renderPENDING () {
   resetUi();
   displayEls('#resendEmail', 'inline-block');
   addMsg(`please verify ${authMech.state.userData.email}`);
