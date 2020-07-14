@@ -1,3 +1,5 @@
+--- THIS PROJECT IS NO LONGER SUPPORTED. THE CODE IS KEPT HERE FOR HISTORICAL REASONS --- 
+
 # Auth-mech
 
 Complements Firebase Authentication service with opinionated approaches to state change observation, treat email verification as default, and fuse user data from the auth engine and an arbitrary Firestore collection.
