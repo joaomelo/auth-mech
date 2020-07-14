@@ -4,8 +4,9 @@
   "description": "Complements Firebase Authentication service with opinionated approaches to state change observation, treat email verification as default, and fuse user data from the auth engine and an arbitrary Firestore collection.",
   "main": "lib/dist/index.js",
   "scripts": {
-    "start": "webpack-dev-server --config demo/cfg/webpack.config.js",
-    "lint": "eslint */src/**/*.js",
+    "start": "npm run dev:server",
+    "dev:server": "webpack-dev-server --config demo/config/webpack.config.js",
+    "lint": "eslint --fix --ext .js,.vue src",
     "build": "rimraf lib/dist/* && webpack --config lib/cfg/webpack.config.js",
     "deploy": "npm run build && npm publish --access public"
   },
@@ -42,15 +43,21 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "eslint-plugin-vue": "^6.2.2",
+    "eslint-plugin-vue-libs": "^4.0.0",
     "firebase": "^7.14.6",
     "html-webpack-plugin": "^4.3.0",
     "rimraf": "^3.0.2",
     "style-loader": "^1.2.1",
+    "vue-loader": "^15.9.3",
+    "vue-template-compiler": "^2.6.11",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.0",
+    "webpack-merge": "^5.0.9"
   },
   "dependencies": {
-    "@joaomelo/bus": "^1.1.4"
+    "@joaomelo/bus": "^1.1.4",
+    "vue": "^2.6.11"
   }
 }

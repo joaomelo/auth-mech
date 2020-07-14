@@ -8,6 +8,8 @@ module.exports = {
     'no-debugger': 'off'
   },
   extends: [
-    'standard'
+    'standard',
+    'plugin:vue/recommended'
   ],
+  plugins: ['vue']
 };

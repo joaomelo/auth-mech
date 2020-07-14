@@ -4,112 +4,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-  <title>auth-mech demo</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <title>arc</title>
 </head>
 
 <body>
-  <div class="container">
-    <main>
-      <form>
-        <h1>login</h1>
-        <div class="content">
-          <input
-            id="email"
-            type="email"
-            placeholder="type email..."
-            class="auth control"
-          >
-          <input
-            id="newPassword"
-            type="password"
-            placeholder="type new password..."
-            class="auth control"
-          >
-          <input
-            id="password"
-            type="password"
-            placeholder="type password..."
-            class="auth control"
-          >
-        </div>
-        <div class="actions">
-          <button 
-            id="signUp"
-            type="button"
-            class="auth control"
-          >
-            Sign Up
-          </button>
-          <button 
-            id="signIn"
-            type="button"
-            class="auth"
-          >
-            Sign In
-          </button>    
-          <button 
-            id="resendEmail"
-            type="button"
-            class="auth"
-          >
-            Resend Email
-          </button>      
-          <button 
-            id="updateEmail"
-            type="button"
-            class="auth"
-          >
-            Update Email
-          </button>      
-          <button 
-            id="updatePassword"
-            type="button"
-            class="auth"
-          >
-            Update Password
-          </button>      
-          <button 
-            id="signOut"
-            type="button"
-            class="auth"
-          >
-            Sign Out
-          </button>      
-        </div>
-      </form>
-      <form>
-        <h1>preferences</h1>
-        <div class="content">
-          <input
-            id="preference"
-            type="text"
-            placeholder="type an arbitrary preference..."
-            class="auth"
-          >
-          <input
-            id="option"
-            type="text"
-            placeholder="type come string option..."
-            class="auth"
-          >
-        </div>
-        <div class="actions">
-          <button 
-            id="set"
-            type="button"
-            class="auth"
-          >
-            Set Properties
-          </button>
-        </div>
-      </form>
-      <div>
-        <h1>messages</h1>
-        <div id="msg" class="msg content"></div>
-      </div>
-    </main>  
-  </div>
+  <div id="app"></div>
 </body>
 
 </html>

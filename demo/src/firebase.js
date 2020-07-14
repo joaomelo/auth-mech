@@ -2,8 +2,6 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 
-import { AuthMech } from '__lib'; // @joaomelo/auth-mech
-
 const fireapp = firebase.initializeApp({
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -14,19 +12,7 @@ const fireapp = firebase.initializeApp({
   appId: process.env.FIREBASE_APP_ID
 });
 
-const auth = fireapp.auth();
-const authMech = new AuthMech({
-  service: auth,
-  fuse: {
-    name: 'profiles',
-    onCreate: user => {
-      const pos = user.email.indexOf('@');
-      const localPart = user.email.slice(0, pos);
-      return {
-        localPart
-      };
-    }
-  }
-});
+const fireauth = fireapp.auth();
+const firedb = fireapp.firestore();
 
-export { authMech };
+export { fireauth, firedb };
